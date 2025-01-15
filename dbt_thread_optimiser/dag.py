@@ -20,6 +20,24 @@ class DAG:
                 else:
                     self.node_children[parent].append(node.name)
 
+    def bulk_add_nodes(self, nodes:dict)->None:
+        self.nodes.update(nodes)
+        for node_name, node in nodes.items():
+            if node_name not in self.node_parents:
+                if node.parents is None:
+                    self.node_parents[node_name] = None
+                else:
+                    self.node_parents[node_name] = node.parents
+            else:
+                self.node_parents[node_name].update(node.parents)
+            
+            if node.parents is not None:
+                for parent in node.parents:
+                    if parent not in self.node_children:
+                        self.node_children[parent] = [node.name]
+                    else:
+                        self.node_children[parent].append(node.name)
+
     def remove_node(self, node:Node)->None:
         if node.name not in self.nodes.keys():
             print("The node does not exist. Add it through the add_note() method.")

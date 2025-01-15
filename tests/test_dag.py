@@ -137,3 +137,34 @@ class DAGTest(unittest.TestCase):
         actual = d.get_upstream_dependencies("order_conversion")
 
         assert expected == actual
+
+    def test_bulk_add_nodes(self):
+        node_dict = {
+            "e_orders": Node("e_orders", children="stg_orders"),
+            "e_orders_legacy": Node("e_orders_legacy", children="stg_orders"),
+            "stg_orders": Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"]),
+            "fct_orders": Node("fct_orders", parents=["stg_orders"]),
+            "order_conversion": Node("order_conversion", parents=["fct_orders", "stg_orders"]),
+        }
+        d = DAG()
+        d.bulk_add_nodes(nodes=node_dict)
+
+        actual_node_children = d.node_children
+        expected_node_children = {
+            "e_orders": ["stg_orders"],
+            "e_orders_legacy": ["stg_orders"],
+            "stg_orders": ["fct_orders", "order_conversion"],
+            "fct_orders": ["order_conversion"]
+        }
+
+        actual_node_parents = d.node_parents
+        expected_node_parents = {
+            "e_orders": None,
+            "e_orders_legacy": None,
+            "stg_orders": ["e_orders", "e_orders_legacy"],
+            "fct_orders": ["stg_orders"],
+            "order_conversion": ["fct_orders", "stg_orders"]
+        }
+
+        assert expected_node_children == actual_node_children
+        assert expected_node_parents == actual_node_parents
