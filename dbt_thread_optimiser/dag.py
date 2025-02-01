@@ -2,7 +2,6 @@ from .node import Node
 
 class DAG:
     def __init__(self):
-        pass
         self.nodes = {}
         self.node_children = {}
         self.node_parents = {}
