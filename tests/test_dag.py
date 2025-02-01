@@ -1,0 +1,170 @@
+import unittest
+from dbt_thread_optimiser.dag import DAG
+from dbt_thread_optimiser.node import Node
+
+class DAGTest(unittest.TestCase):
+
+    # @classmethod
+    # def setUpClass(self):
+    #     self.DAG = DAG
+
+    #     e_orders = Node("e_orders", children="stg_orders")
+    #     e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+    #     stg_orders = Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"])
+    #     fct_orders = Node("fct_orders", parents=["stg_orders"])
+    #     self.DAG.add_node(e_orders)
+    #     self.DAG.add_node(e_orders_legacy)
+    #     self.DAG.add_node(stg_orders)
+    #     self.DAG.add_node(fct_orders)
+
+    # def test_get_upstream_dependencies(self):
+    #     expected = ["stg_orders", "e_orders_legacy", "e_orders"]
+
+    #     actual = self.DAG.get_upstream_dependencies(table_name="fct_orders")
+    #     assert actual == expected
+
+    def test_add_node(self):
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        d = DAG()
+        d.add_node(fct_orders)
+
+        actual = d.nodes["fct_orders"]
+        assert fct_orders == actual
+
+    def test_parent_dict(self):
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        d = DAG()
+        d.add_node(fct_orders)
+
+        actual = d.node_parents
+        expected = {
+            "fct_orders": ["stg_orders"]
+        }
+        assert expected == actual
+
+    def test_multiple_parents_dict(self):
+        fct_orders = Node("fct_orders", parents=["stg_orders", "stg_user"])
+        d = DAG()
+        d.add_node(fct_orders)
+
+        actual = d.node_parents
+        expected = {
+            "fct_orders": ["stg_orders", "stg_user"]
+        }
+        assert expected == actual
+
+    def test_children_dict(self):
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        d = DAG()
+        d.add_node(fct_orders)
+
+        actual = d.node_children
+        expected = {
+            "stg_orders": ["fct_orders"]
+        }
+        assert expected == actual
+
+    def test_multiple_children_dict(self):
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        fct_order_conversion = Node("fct_order_conversion", parents=["stg_orders"])
+        d = DAG()
+        d.add_node(fct_orders)
+        d.add_node(fct_order_conversion)
+
+        actual = d.node_children
+        expected = {
+            "stg_orders": ["fct_orders", "fct_order_conversion"]
+        }
+        assert expected == actual
+
+    def test_add_same_node_name(self):
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        fct_orders2 = Node("fct_orders", parents=["stg_orders2"])
+        d = DAG()
+        d.add_node(fct_orders)
+        d.add_node(fct_orders2)
+
+        actual = d.node_children
+        expected = {
+            "stg_orders": ["fct_orders"]
+        }
+        assert expected == actual
+
+    def test_remove_node(self):
+        e_orders = Node("e_orders", children="stg_orders")
+        e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+        stg_orders = Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"])
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        d = DAG()
+        d.add_node(e_orders)
+        d.add_node(e_orders_legacy)
+        d.add_node(stg_orders)
+        d.add_node(fct_orders)
+
+        d.remove_node(fct_orders)
+
+        actual_node_children = d.node_children
+        expected_node_children = {
+            "e_orders": ["stg_orders"],
+            "e_orders_legacy": ["stg_orders"],
+            "stg_orders": []
+        }
+
+        actual_node_parents = d.node_parents
+        expected_node_parents = {
+            "e_orders": None,
+            "e_orders_legacy": None,
+            "stg_orders": ["e_orders", "e_orders_legacy"],
+        }
+        
+        assert expected_node_children == actual_node_children
+        assert expected_node_parents == actual_node_parents
+
+    def test_upstream_dependencies(self):
+        e_orders = Node("e_orders", children="stg_orders")
+        e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+        stg_orders = Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"])
+        fct_orders = Node("fct_orders", parents=["stg_orders"])
+        order_conversion = Node("order_conversion", parents=["fct_orders", "stg_orders"])
+        d = DAG()
+        d.add_node(e_orders)
+        d.add_node(e_orders_legacy)
+        d.add_node(stg_orders)
+        d.add_node(fct_orders)
+        d.add_node(order_conversion)
+
+        expected = list(set(["fct_orders", "stg_orders", "e_orders_legacy", "e_orders"]))
+        actual = d.get_upstream_dependencies("order_conversion")
+
+        assert expected == actual
+
+    def test_bulk_add_nodes(self):
+        node_dict = {
+            "e_orders": Node("e_orders", children="stg_orders"),
+            "e_orders_legacy": Node("e_orders_legacy", children="stg_orders"),
+            "stg_orders": Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"]),
+            "fct_orders": Node("fct_orders", parents=["stg_orders"]),
+            "order_conversion": Node("order_conversion", parents=["fct_orders", "stg_orders"]),
+        }
+        d = DAG()
+        d.bulk_add_nodes(nodes=node_dict)
+
+        actual_node_children = d.node_children
+        expected_node_children = {
+            "e_orders": ["stg_orders"],
+            "e_orders_legacy": ["stg_orders"],
+            "stg_orders": ["fct_orders", "order_conversion"],
+            "fct_orders": ["order_conversion"]
+        }
+
+        actual_node_parents = d.node_parents
+        expected_node_parents = {
+            "e_orders": None,
+            "e_orders_legacy": None,
+            "stg_orders": ["e_orders", "e_orders_legacy"],
+            "fct_orders": ["stg_orders"],
+            "order_conversion": ["fct_orders", "stg_orders"]
+        }
+
+        assert expected_node_children == actual_node_children
+        assert expected_node_parents == actual_node_parents
