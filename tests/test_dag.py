@@ -1,6 +1,6 @@
 import unittest
-from dbt_thread_optimiser.dag import DAG
-from dbt_thread_optimiser.node import Node
+from dbt_run_analyser.dag import DAG
+from dbt_run_analyser.node import Node
 
 class DAGTest(unittest.TestCase):
 
