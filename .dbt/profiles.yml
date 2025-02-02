@@ -1,9 +1,9 @@
-duckdb:
-  target: dev
+default:
   outputs:
     dev:
       type: duckdb
-      path: 'file_path/database_name.duckdb'
+      path: /tmp/dbt.duckdb
+      threads: 1
       extensions:
         - httpfs
         - parquet
@@ -11,3 +11,4 @@ duckdb:
         s3_region: my-aws-region
         s3_access_key_id: "{{ env_var('S3_ACCESS_KEY_ID') }}"
         s3_secret_access_key: "{{ env_var('S3_SECRET_ACCESS_KEY') }}"
+  target: dev

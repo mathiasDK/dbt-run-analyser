@@ -15,7 +15,7 @@ def model(dbt, session):
 
         for i in range(n_orders):
             order_id = f'{store}_{1000+i}'
-            for l in random.randint(1,5):
+            for _ in range(random.randint(1,5)):
                 product = random.choice(product_ids)
                 quantity = random.randint(1,5)
                 products.append(product)
@@ -29,5 +29,6 @@ def model(dbt, session):
     }
 
     df = pd.DataFrame(data)
+    df = df.groupby(["order_id", "product_id"])["quantity"].sum().reset_index()
 
     return df

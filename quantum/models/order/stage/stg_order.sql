@@ -1,12 +1,24 @@
 {{ config(materialized='table') }}
 
-with combined as (
+with combined_orders as (
 
-    select * from {{ ref('e_online_order')}}
+    select 
+        order_id,
+        'online' as store_id,
+        customer_id,
+        date as order_date
+    from {{ ref('e_online_order')}}
+    
     union all
-    select * from {{ ref('e_instore_order')}}
+    
+    select 
+        order_id,
+        store_id,
+        customer_id,
+        date as order_date
+    from {{ ref('e_instore_order')}}
 
 )
 
 select *
-from combined
+from combined_orders
