@@ -1,4 +1,4 @@
-# dbt_thread_optimiser
+# dbt Run Analyser
 
 ![Coverage Badge](docs/coverage.svg)
 
