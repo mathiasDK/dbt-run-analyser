@@ -170,4 +170,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# dbt
 .dbt/.user.yml
+quantum/logs/
+quantum/target/
+quantum/dbt_packages/

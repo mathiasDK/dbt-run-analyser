@@ -24,5 +24,11 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   quantum:
-    example:
+    order:
       +materialized: table
+      events:
+        +schema: event
+      stage:
+        +schema: stage
+      mart:
+        +schema: order_mart
