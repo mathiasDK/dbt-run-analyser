@@ -1,5 +1,5 @@
 [project]
-name = "dbt_thread_optimiser"
+name = "dbt_run_analyser"
 version = "0.1.0"
 description = "Python library to analyse thread utilisation for dbt runs."
 readme = "README.md"
@@ -17,13 +17,13 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: Apache Software License",
 ]
-keywords = ["dbt_thread_optimiser"]
+keywords = ["dbt_run_analyser"]
 dependencies = [
     "pandas>=2.2",
 ] 
 
 [project.urls]
-Homepage = "https://github.com/mathiasDK/dbt_thread_optimiser"
+Homepage = "https://github.com/mathiasDK/dbt_run_analyser"
 
 [project.optional-dependencies]
 test = [
@@ -45,7 +45,7 @@ testpaths = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["dbt_thread_optimiser"]
+include = ["dbt_run_analyser"]
 exclude = ["docs*", "logs*", "quantum*"]
 
 [tool.black]
