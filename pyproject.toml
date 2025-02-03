@@ -20,6 +20,7 @@ classifiers = [
 keywords = ["dbt_run_analyser"]
 dependencies = [
     "pandas>=2.2",
+    "json",
 ] 
 
 [project.urls]
@@ -35,6 +36,8 @@ test = [
     "coverage-badge==1.*",
     "pytest-cov==4.0.0",
     "twine==4.0.0",
+    "dbt-core==1.9.1",
+    "dbt-duckdb==1.9.1",
 ]
 
 [tool.pytest.ini_options]
