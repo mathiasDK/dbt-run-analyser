@@ -1,16 +1,16 @@
-class ManifestParser:
-    def __init__(self) -> None:
-        self.nodes = None
+import json
 
-    @property
-    def nodes(self):
-        return self.nodes
-    
-    @nodes.setter
-    def nodes(self, nodes: list[str]):
-        self.nodes = nodes
+def manifest_parser(path_to_manifest)->dict:
+    # Convert json to dict
+    d = json.load(open(path_to_manifest))
 
-    @nodes.deleter
-    def nodes(self):
-        print("Removing all nodes")
-        del self.nodes
+    nodes = {}
+
+    for node, vals in d["nodes"].items():
+        upstream_models = vals.get("depends_on")["nodes"]
+        if upstream_models == []:
+            nodes[node] = None
+        else:
+            nodes[node] = upstream_models
+
+    return nodes
