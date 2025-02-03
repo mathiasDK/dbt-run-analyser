@@ -1,5 +1,5 @@
 [project]
-name = "dbt_run_analyser"
+name = "dbt-run-analyser"
 version = "0.1.0"
 description = "Python library to analyse thread utilisation for dbt runs."
 readme = "README.md"
@@ -48,7 +48,7 @@ testpaths = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["dbt_run_analyser"]
+include = ["src"]
 exclude = ["docs*", "logs*", "quantum*", "test_data*"]
 
 [tool.black]

@@ -1,6 +1,6 @@
 import unittest
-from dbt_run_analyser.dag import DAG
-from dbt_run_analyser.node import Node
+from src.dag import DAG
+from src.node import Node
 
 class DAGTest(unittest.TestCase):
 
