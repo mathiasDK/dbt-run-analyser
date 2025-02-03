@@ -1,5 +1,5 @@
 import unittest
-from dbt_run_analyser.utils.manifest_parser import manifest_parser
+from src.utils.manifest_parser import manifest_parser
 
 class ManifestParserTest(unittest.TestCase):
     def setUp(self):
