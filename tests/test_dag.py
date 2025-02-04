@@ -168,3 +168,18 @@ class DAGTest(unittest.TestCase):
 
         assert expected_node_children == actual_node_children
         assert expected_node_parents == actual_node_parents
+
+    def test_get_critical_path(self):
+        node_dict = {
+            "e_orders": Node("e_orders", children="stg_orders", run_time=2),
+            "e_orders_legacy": Node("e_orders_legacy", children="stg_orders", run_time=3),
+            "stg_orders": Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"], run_time=1),
+            "fct_orders": Node("fct_orders", parents=["e_orders_legacy"], run_time=10),
+            "order_conversion": Node("order_conversion", parents=["fct_orders", "stg_orders"], run_time=2),
+        }
+        d = DAG()
+        d.bulk_add_nodes(nodes=node_dict)
+        actual = d.get_critial_path("order_conversion")
+        print(actual)
+        expected = {"path": "order_conversion->fct_orders->e_orders_legacy", "total_run_time": 15}
+        self.assertEqual(expected, actual)
