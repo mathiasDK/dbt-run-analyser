@@ -1,0 +1,38 @@
+20:52:24  Running with dbt=1.9.1
+20:52:25  Registered adapter: duckdb=1.9.1
+20:52:26  Found 13 models, 424 macros
+20:52:26  
+20:52:26  Concurrency: 3 threads (target='dev')
+20:52:26  
+20:52:27  1 of 13 START python table model main_event.e_order_event_1 .................... [RUN]
+20:52:27  2 of 13 START python table model main_event.e_order_event_2 .................... [RUN]
+20:52:27  3 of 13 START python table model main_event.e_order_event_3 .................... [RUN]
+20:52:30  1 of 13 OK created python table model main_event.e_order_event_1 ............... [OK in 2.78s]
+20:52:30  4 of 13 START python table model main_event.e_order_event_4 .................... [RUN]
+20:52:31  2 of 13 OK created python table model main_event.e_order_event_2 ............... [OK in 3.73s]
+20:52:31  5 of 13 START python table model main_event.e_order_event_5 .................... [RUN]
+20:52:32  3 of 13 OK created python table model main_event.e_order_event_3 ............... [OK in 4.74s]
+20:52:32  6 of 13 START python table model main_event.e_order_event_6 .................... [RUN]
+20:52:34  4 of 13 OK created python table model main_event.e_order_event_4 ............... [OK in 4.10s]
+20:52:34  7 of 13 START python table model main_event.e_order_event_7 .................... [RUN]
+20:52:36  5 of 13 OK created python table model main_event.e_order_event_5 ............... [OK in 5.09s]
+20:52:36  8 of 13 START python table model main_stage.stg_order_some ..................... [RUN]
+20:52:38  6 of 13 OK created python table model main_event.e_order_event_6 ............... [OK in 6.07s]
+20:52:41  8 of 13 OK created python table model main_stage.stg_order_some ................ [OK in 5.19s]
+20:52:41  7 of 13 OK created python table model main_event.e_order_event_7 ............... [OK in 7.17s]
+20:52:41  9 of 13 START python table model main_stage.stg_order .......................... [RUN]
+20:52:52  9 of 13 OK created python table model main_stage.stg_order ..................... [OK in 10.38s]
+20:52:52  10 of 13 START python table model main_order_mart.dim_customer ................. [RUN]
+20:52:52  11 of 13 START python table model main_order_mart.dim_store .................... [RUN]
+20:52:52  12 of 13 START python table model main_order_mart.fct_order .................... [RUN]
+20:52:54  11 of 13 OK created python table model main_order_mart.dim_store ............... [OK in 2.27s]
+20:52:56  12 of 13 OK created python table model main_order_mart.fct_order ............... [OK in 4.32s]
+20:53:00  10 of 13 OK created python table model main_order_mart.dim_customer ............ [OK in 8.32s]
+20:53:00  13 of 13 START python table model main_order_mart.order_wide ................... [RUN]
+20:53:12  13 of 13 OK created python table model main_order_mart.order_wide .............. [OK in 12.47s]
+20:53:13  
+20:53:13  Finished running 13 table models in 0 hours 0 minutes and 46.83 seconds (46.83s).
+20:53:13  
+20:53:13  Completed successfully
+20:53:13  
+20:53:13  Done. PASS=13 WARN=0 ERROR=0 SKIP=0 TOTAL=13
