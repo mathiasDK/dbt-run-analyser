@@ -1,0 +1,38 @@
+2025-02-05T20:56:13+0000 [base] 20:56:13  Running with dbt=1.9.1
+2025-02-05T20:56:15+0000 [base] 20:56:15  Registered adapter: duckdb=1.9.1
+2025-02-05T20:56:16+0000 [base] 20:56:16  Found 13 models, 424 macros
+2025-02-05T20:56:16+0000 [base] 20:56:16  
+2025-02-05T20:56:16+0000 [base] 20:56:16  Concurrency: 1 threads (target='dev')
+2025-02-05T20:56:16+0000 [base] 20:56:16  
+2025-02-05T20:56:19+0000 [base] 20:56:19  1 of 13 START incremental table model main_event.e_order_event_1 .................... [RUN]
+2025-02-05T20:56:23+0000 [base] 20:56:23  1 of 13 OK created incremental table model main_event.e_order_event_1 ............... [OK in 3.92s]
+2025-02-05T20:56:23+0000 [base] 20:56:23  2 of 13 START sql table model main_event.e_order_event_2 .................... [RUN]
+2025-02-05T20:56:25+0000 [base] 20:56:25  2 of 13 OK created sql table model main_event.e_order_event_2 ............... [OK in 2.46s]
+2025-02-05T20:56:25+0000 [base] 20:56:25  3 of 13 START view table model main_event.e_order_event_3 .................... [RUN]
+2025-02-05T20:56:29+0000 [base] 20:56:29  3 of 13 OK created view table model main_event.e_order_event_3 ............... [OK in 3.32s]
+2025-02-05T20:56:29+0000 [base] 20:56:29  4 of 13 START python table model main_event.e_order_event_4 .................... [RUN]
+2025-02-05T20:56:33+0000 [base] 20:56:33  4 of 13 OK created python table model main_event.e_order_event_4 ............... [OK in 4.67s]
+2025-02-05T20:56:33+0000 [base] 20:56:33  5 of 13 START python table model main_event.e_order_event_5 .................... [RUN]
+2025-02-05T20:56:39+0000 [base] 20:56:39  5 of 13 OK created python table model main_event.e_order_event_5 ............... [OK in 5.37s]
+2025-02-05T20:56:39+0000 [base] 20:56:39  6 of 13 START python table model main_event.e_order_event_6 .................... [RUN]
+2025-02-05T20:56:45+0000 [base] 20:56:45  6 of 13 OK created python table model main_event.e_order_event_6 ............... [OK in 6.32s]
+2025-02-05T20:56:45+0000 [base] 20:56:45  7 of 13 START python table model main_event.e_order_event_7 .................... [RUN]
+2025-02-05T20:56:52+0000 [base] 20:56:52  7 of 13 OK created python table model main_event.e_order_event_7 ............... [OK in 7.21s]
+2025-02-05T20:56:52+0000 [base] 20:56:52  8 of 13 START python table model main_stage.stg_order_some ..................... [RUN]
+2025-02-05T20:56:58+0000 [base] 20:56:58  8 of 13 OK created python table model main_stage.stg_order_some ................ [OK in 5.22s]
+2025-02-05T20:56:58+0000 [base] 20:56:58  9 of 13 START python table model main_stage.stg_order .......................... [RUN]
+2025-02-05T20:57:08+0000 [base] 20:57:08  9 of 13 OK created python table model main_stage.stg_order ..................... [OK in 10.21s]
+2025-02-05T20:57:08+0000 [base] 20:57:08  10 of 13 START python table model main_order_mart.dim_customer ................. [RUN]
+2025-02-05T20:57:16+0000 [base] 20:57:16  10 of 13 OK created python table model main_order_mart.dim_customer ............ [OK in 8.26s]
+2025-02-05T20:57:16+0000 [base] 20:57:16  11 of 13 START python table model main_order_mart.dim_store .................... [RUN]
+2025-02-05T20:57:18+0000 [base] 20:57:18  11 of 13 OK created python table model main_order_mart.dim_store ............... [OK in 2.27s]
+2025-02-05T20:57:18+0000 [base] 20:57:18  12 of 13 START python table model main_order_mart.fct_order .................... [RUN]
+2025-02-05T20:57:23+0000 [base] 20:57:23  12 of 13 OK created python table model main_order_mart.fct_order ............... [OK in 4.50s]
+2025-02-05T20:57:23+0000 [base] 20:57:23  13 of 13 START python table model main_order_mart.order_wide ................... [RUN]
+2025-02-05T20:57:35+0000 [base] 20:57:35  13 of 13 OK created python table model main_order_mart.order_wide .............. [OK in 12.33s]
+2025-02-05T20:57:35+0000 [base] 20:57:35  
+2025-02-05T20:57:35+0000 [base] 20:57:35  Finished running 13 table models in 0 hours 1 minutes and 19.07 seconds (79.07s).
+2025-02-05T20:57:35+0000 [base] 20:57:35  
+2025-02-05T20:57:35+0000 [base] 20:57:35  Completed successfully
+2025-02-05T20:57:35+0000 [base] 20:57:35  
+2025-02-05T20:57:35+0000 [base] 20:57:35  Done. PASS=13 WARN=0 ERROR=0 SKIP=0 TOTAL=13

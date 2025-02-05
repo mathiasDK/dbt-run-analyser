@@ -1,6 +1,6 @@
 import unittest
-from src.dag import DAG
-from src.node import Node
+from dbt_run_analyser.dag import DAG
+from dbt_run_analyser.node import Node
 
 class DAGTest(unittest.TestCase):
 
@@ -169,6 +169,20 @@ class DAGTest(unittest.TestCase):
         assert expected_node_children == actual_node_children
         assert expected_node_parents == actual_node_parents
 
+    def test_find_paths(self):
+        node_dict = {
+            "e_orders": Node("e_orders", children="stg_orders", run_time=2),
+            "e_orders_legacy": Node("e_orders_legacy", children="stg_orders", run_time=3),
+            "stg_orders": Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"], run_time=1),
+            "fct_orders": Node("fct_orders", parents=["e_orders_legacy"], run_time=10),
+            "order_conversion": Node("order_conversion", parents=["fct_orders", "stg_orders"], run_time=2),
+        }
+        d = DAG()
+        d.bulk_add_nodes(nodes=node_dict)
+        actual = d.find_all_paths_to_node("order_conversion")
+        expected = [['e_orders_legacy', 'fct_orders', 'order_conversion'], ['e_orders', 'stg_orders', 'order_conversion'], ['e_orders_legacy', 'stg_orders', 'order_conversion']]
+        self.assertEqual(expected, actual)
+
     def test_get_critical_path(self):
         node_dict = {
             "e_orders": Node("e_orders", children="stg_orders", run_time=2),
@@ -180,6 +194,24 @@ class DAGTest(unittest.TestCase):
         d = DAG()
         d.bulk_add_nodes(nodes=node_dict)
         actual = d.get_critial_path("order_conversion")
-        print(actual)
-        expected = {"path": "order_conversion->fct_orders->e_orders_legacy", "total_run_time": 15}
+        expected = {
+            'e_orders_legacy': {
+                'path': ['e_orders_legacy', 'stg_orders', 'order_conversion'], 
+                'total_run_time': 6, 
+                'run_time_dict': {
+                    'e_orders_legacy': 3, 
+                    'order_conversion': 2, 
+                    'stg_orders': 1
+                }
+            }, 
+            'e_orders': {
+                'path': ['e_orders', 'stg_orders', 'order_conversion'], 
+                'total_run_time': 5, 
+                'run_time_dict': {
+                    'e_orders': 2, 
+                    'order_conversion': 2, 
+                    'stg_orders': 1
+                }
+            }
+        }
         self.assertEqual(expected, actual)

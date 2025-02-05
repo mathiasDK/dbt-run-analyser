@@ -69,37 +69,54 @@ class DAG:
                     deps.extend(self.get_upstream_dependencies(parent_name, deps=deps))
         return list(set(deps)) # ensures uniqueness
     
+    def find_all_paths_to_node(self, target, path=None, paths=[]):
+        if path is None:
+            path = []
+        
+        # Add the target node to the current path
+        path = [target] + path
+
+        print("target:", target)
+        print("path", path)
+        
+        # If the target node has no incoming edges, return the current path
+        if target not in self.node_parents:
+            return [path]
+        
+        paths = []
+        
+        # Traverse each predecessor of the target node
+        if self.node_parents[target] is None:
+            return [path]
+        for node in self.node_parents[target]:
+            if node is None:
+                return paths
+            if node not in path:  # Avoid cycles
+                new_paths = self.find_all_paths_to_node(node, path, paths)
+                for p in new_paths:
+                    paths.append(p)
+                    
+        return paths
+    
     def get_critial_path(self, model=None):
-        # if model is none then set it to the model which completes last
-        # otherwise look at all upstream models and their run time.
-        results = defaultdict(list)
-        print(self._run_time_lookup)
-
-        def traverse(node=model, current_path="", current_sum=0):
-            # if node not in self.node_parents or node is None:
-            #     return
-            
-            run_time = self.get_run_time(node)
-            parents = self.node_parents.get(node)
-
-            # Opdater nuværende sti og sum
-            new_path = f"{node}->{current_path}" if current_path else node
-            new_sum = current_sum + run_time
-
-            # Gem stien og summen
-            results[node].append({"path": new_path, "total_run_time": new_sum})
-
-            # Hvis der er forældre, gå rekursivt opad for hver parent
-            if parents:
-                for parent in parents:
-                    traverse(parent, new_path.split("->"), new_sum)
-
-        # Start traversal for hver node uden forældre
-        for model in self.node_parents:
-            if self.node_parents[model] is not None:  # Ingen forældre = en rod i træet
-                traverse(model, [], 0)
-
-        return results
+        if model is None:
+            return None
+        
+        paths = self.find_all_paths_to_node(model)
+        
+        output = {}
+        for path in paths:
+            total_run_time = sum(self.get_run_time(node) for node in path)
+            run_time_dict = {node: self.get_run_time(node) for node in path}
+            run_time_dict = {k: v for k, v in sorted(run_time_dict.items(), key=lambda item: item[1], reverse=True)}
+            output[path[0]] = {
+                'path': path,
+                'total_run_time': total_run_time,
+                'run_time_dict': run_time_dict
+            }
+        output = {k: v for k, v in sorted(output.items(), key=lambda item: item[1]['total_run_time'], reverse=True)}
+        
+        return output
 
     def get_inbetween_models(self, model=None):
         # check if a model exists in between others, e.g. a->b->c, a->c should highlight b.
@@ -111,3 +128,4 @@ class DAG:
             print(f"No runtime for {model}")
             return None
         return run_time
+    

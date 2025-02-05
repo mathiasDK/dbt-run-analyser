@@ -1,5 +1,5 @@
 [project]
-name = "dbt-run-analyser"
+name = "dbt_run_analyser"
 version = "0.1.0"
 description = "Python library to analyse thread utilisation for dbt runs."
 readme = "README.md"
@@ -17,14 +17,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: Apache Software License",
 ]
-keywords = ["dbt_run_analyser"]
 dependencies = [
     "pandas>=2.2",
-    "json",
 ] 
 
 [project.urls]
-Homepage = "https://github.com/mathiasDK/dbt_run_analyser"
+Homepage = "https://github.com/mathiasDK/dbt-run-analyser"
 
 [project.optional-dependencies]
 test = [
@@ -47,9 +45,11 @@ testpaths = [
     "tests"
 ]
 
-[tool.setuptools.packages.find]
-include = ["src"]
+[tool.hatch.build.targets.sdist]
 exclude = ["docs*", "logs*", "quantum*", "test_data*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["dbt_run_analyser"]
 
 [tool.black]
 line-length = 88
