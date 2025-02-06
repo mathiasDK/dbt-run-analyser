@@ -1,5 +1,5 @@
 from .node import Node
-from collections import defaultdict
+from .utils.manifest_parser import manifest_parser
 
 class DAG:
     def __init__(self):
@@ -128,4 +128,9 @@ class DAG:
             print(f"No runtime for {model}")
             return None
         return run_time
+    
+    def manifest_to_nodes(self, manifest_path:str)->None:
+        nodes = manifest_parser(manifest_path)
+        for node, parents in nodes.items():
+            self.add_node(Node(name=node, parents=parents))
     
