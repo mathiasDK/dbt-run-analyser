@@ -3,11 +3,14 @@ from .utils.manifest_parser import manifest_parser
 from .utils.log_parser import LogParser
 
 class DAG:
-    def __init__(self, log_file:str=None):
+    def __init__(self, manifest_path:str=None, log_file:str=None):
         self.nodes = {}
         self.node_children = {}
         self.node_parents = {}
         self._run_time_lookup = {}
+
+        if manifest_path:
+            self.manifest_to_nodes(manifest_path)
 
         if log_file:
             self.log_to_run_time(log_file)
