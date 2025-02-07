@@ -1,12 +1,16 @@
 from .node import Node
+from .utils.manifest_parser import manifest_parser
 from .utils.log_parser import LogParser
 
 class DAG:
-    def __init__(self, log_file:str=None):
+    def __init__(self, manifest_path:str=None, log_file:str=None):
         self.nodes = {}
         self.node_children = {}
         self.node_parents = {}
         self._run_time_lookup = {}
+
+        if manifest_path:
+            self.manifest_to_nodes(manifest_path)
 
         if log_file:
             self.log_to_run_time(log_file)
@@ -132,6 +136,11 @@ class DAG:
             return None
         return run_time
     
+    def manifest_to_nodes(self, manifest_path:str)->None:
+        nodes = manifest_parser(manifest_path)
+        for node, parents in nodes.items():
+            self.add_node(Node(name=node, parents=parents))
+
     def log_to_run_time(self, log_file:str)->None:
         df = LogParser(log_file).parse_logs()
         run_time = df[['model_name', 'run_time']].to_dict(as_series=False)

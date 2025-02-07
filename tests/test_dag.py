@@ -216,6 +216,29 @@ class DAGTest(unittest.TestCase):
         }
         self.assertEqual(expected, actual)
 
+    def test_init_manifest_to_nodes(self):
+        MANIFEST_PATH = "test_data/manifest/manifest.json"
+        d = DAG(manifest_path=MANIFEST_PATH)
+        actual = set(list(d.nodes.keys()))
+        expected = set([
+            "e_order_event_1", "e_order_event_2", "e_order_event_3", "e_order_event_4", "e_order_event_5", "e_order_event_6", "e_order_event_7",             
+            "stg_order_some", "stg_order",
+            "dim_customer", "dim_store", "fct_order", "order_wide",
+        ])
+        self.assertEqual(expected, actual)
+
+    def test_manifest_to_nodes(self):
+        MANIFEST_PATH = "test_data/manifest/manifest.json"
+        d = DAG()
+        d.manifest_to_nodes(MANIFEST_PATH)
+        actual = set(list(d.nodes.keys()))
+        expected = set([
+            "e_order_event_1", "e_order_event_2", "e_order_event_3", "e_order_event_4", "e_order_event_5", "e_order_event_6", "e_order_event_7",             
+            "stg_order_some", "stg_order",
+            "dim_customer", "dim_store", "fct_order", "order_wide",
+        ])
+        self.assertEqual(expected, actual)
+
     def test_init_log_file(self):
         d = DAG(log_file="test_data/cli_output/dbt_1_thread.log")
         expected_run_time = {
