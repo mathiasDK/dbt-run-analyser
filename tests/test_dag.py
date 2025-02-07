@@ -1,6 +1,9 @@
 import unittest
 from dbt_run_analyser.dag import DAG
 from dbt_run_analyser.node import Node
+import polars as pl
+from polars.testing import assert_frame_equal
+from datetime import timedelta as td
 
 class DAGTest(unittest.TestCase):
 
@@ -133,8 +136,8 @@ class DAGTest(unittest.TestCase):
         d.add_node(fct_orders)
         d.add_node(order_conversion)
 
-        expected = list(set(["fct_orders", "stg_orders", "e_orders_legacy", "e_orders"]))
-        actual = d.get_upstream_dependencies("order_conversion")
+        expected = set(["fct_orders", "stg_orders", "e_orders_legacy", "e_orders"])
+        actual = set(d.get_upstream_dependencies("order_conversion"))
 
         assert expected == actual
 
@@ -262,3 +265,65 @@ class DAGTest(unittest.TestCase):
         d = DAG()
         d.log_to_run_time("test_data/cli_output/dbt_1_thread.log")
         self.assertIsNone(d.get_run_time("some_random_non_existing_model"))
+
+    def test_estimate_thread_1(self):
+        d = DAG(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        actual = d._estimate_thread(d.df).head(5)
+        expected = pl.DataFrame(data={
+            "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
+            "run_time": [3.92, 2.46, 3.32, 4.67, 5.37],
+            "relative_start_time": [td(seconds=0), td(seconds=3, milliseconds=460), td(seconds=6, milliseconds=600), td(seconds=9, milliseconds=250), td(seconds=14, milliseconds=550)],
+            "relative_end_time": [td(seconds=3, milliseconds=920), td(seconds=5, milliseconds=920), td(seconds=9, milliseconds=920), td(seconds=13, milliseconds=920), td(seconds=19, milliseconds=920)],
+            "thread": [0, 1, 0, 1, 0]
+        })
+        assert_frame_equal(expected, actual, check_dtypes=False)
+
+    
+    def test_estimate_thread_2(self):
+        d = DAG(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_2_thread.log"
+        )
+        actual = d._estimate_thread(d.df).head(5)
+        expected = pl.DataFrame(data={
+            "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
+            "run_time": [2.84, 3.79, 3.42, 4.12, 5.17],
+            "relative_start_time": [td(seconds=0), td(seconds=0, milliseconds=50), td(seconds=3, milliseconds=420), td(seconds=3, milliseconds=720), td(seconds=6, milliseconds=670)],
+            "relative_end_time": [td(seconds=2, milliseconds=840), td(seconds=3, milliseconds=840), td(seconds=6, milliseconds=840), td(seconds=7, milliseconds=840), td(seconds=11, milliseconds=840)],
+            "thread": [0, 1, 0, 2, 1]
+        })
+        assert_frame_equal(expected, actual, check_dtypes=False)
+
+    def test_to_df_all(self):
+        d = DAG(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        actual = d.to_df().head(5)
+        expected = pl.DataFrame(data={
+            "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
+            "run_time": [3.92, 2.46, 3.32, 4.67, 5.37],
+            "relative_start_time": [td(seconds=0), td(seconds=3, milliseconds=460), td(seconds=6, milliseconds=600), td(seconds=9, milliseconds=250), td(seconds=14, milliseconds=550)],
+            "relative_end_time": [td(seconds=3, milliseconds=920), td(seconds=5, milliseconds=920), td(seconds=9, milliseconds=920), td(seconds=13, milliseconds=920), td(seconds=19, milliseconds=920)],
+            "thread": [0, 1, 0, 1, 0]
+        })
+        assert_frame_equal(expected, actual, check_dtypes=False)
+
+    def test_to_df_citical_path(self):
+        d = DAG(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        actual = d.to_df(critical_path_model="order_wide")
+        print(actual)
+        expected = pl.DataFrame(data={
+            "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
+            "run_time": [7.21, 10.21, 4.5, 12.33],
+            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
+            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
+            "thread": [0, 0, 0, 1]
+        })
+        assert_frame_equal(expected, actual, check_dtypes=False)

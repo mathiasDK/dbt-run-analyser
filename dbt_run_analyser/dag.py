@@ -1,6 +1,7 @@
 from .node import Node
 from .utils.manifest_parser import manifest_parser
 from .utils.log_parser import LogParser
+import polars as pl
 
 class DAG:
     def __init__(self, manifest_path:str=None, log_file:str=None):
@@ -8,6 +9,7 @@ class DAG:
         self.node_children = {}
         self.node_parents = {}
         self._run_time_lookup = {}
+        self.df = pl.DataFrame()
 
         if manifest_path:
             self.manifest_to_nodes(manifest_path)
@@ -82,9 +84,6 @@ class DAG:
         
         # Add the target node to the current path
         path = [target] + path
-
-        print("target:", target)
-        print("path", path)
         
         # If the target node has no incoming edges, return the current path
         if target not in self.node_parents:
@@ -133,7 +132,6 @@ class DAG:
         run_time = self._run_time_lookup.get(model)
         if run_time is None:
             print(f"No runtime for {model}")
-            return None
         return run_time
     
     def manifest_to_nodes(self, manifest_path:str)->None:
@@ -146,4 +144,43 @@ class DAG:
         run_time = df[['model_name', 'run_time']].to_dict(as_series=False)
         for model, run_time in zip(run_time['model_name'], run_time['run_time']):
             self._run_time_lookup[model] = run_time # overwrites existing runtimes
+        self.df = df
+
+    def _estimate_thread(self, df:pl.DataFrame)->pl.DataFrame:
+        df = df.sort(by=["relative_start_time", "relative_end_time"])
+        df = df.with_columns(thread = pl.lit(0))
+
+        parellel_processing = {k: {"end_time": None} for k in range(200)} # Setting an arbitrary max number of threads
+        d = df.rows_by_key(key=["model_name"], named=True)
+
+        for idx, (model_name, row) in enumerate(d.items()):
+            row = row[0]
+            for m, v in parellel_processing.items():
+                if v["end_time"] is None or v.get("end_time") < row["relative_start_time"]:
+                    parellel_processing[m] = {"end_time": row["relative_end_time"]}
+                    df[idx, "thread"] = m
+                    break
+        return df
+    
+    def to_df(self, critical_path_model:str=None)->pl.DataFrame:
+        nodes = None
+        if critical_path_model:
+            critical_path_model = self.get_critial_path(critical_path_model)
+            first_model = list(critical_path_model.keys())[0]
+            nodes = critical_path_model.get(first_model).get("path")
+        
+        if nodes is not None:
+            df = self.df.filter(pl.col("model_name").is_in(nodes))
+            # Reset the relative start time
+            first_start_time = df["relative_start_time"].min()
+            df = df.with_columns(
+                (pl.col("relative_start_time") - first_start_time).alias("relative_start_time"),
+                (pl.col("relative_end_time") - first_start_time).alias("relative_end_time"),
+            )
+            # Should relative start time be the previous relative end time?
+        else:
+            df = self.df
+
+        df = self._estimate_thread(df)
+        return df
     
