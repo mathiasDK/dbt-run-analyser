@@ -1,12 +1,15 @@
 from .node import Node
-from collections import defaultdict
+from .utils.log_parser import LogParser
 
 class DAG:
-    def __init__(self):
+    def __init__(self, log_file:str=None):
         self.nodes = {}
         self.node_children = {}
         self.node_parents = {}
         self._run_time_lookup = {}
+
+        if log_file:
+            self.log_to_run_time(log_file)
 
     def add_node(self, node:Node)->None:
         if node.name in self.nodes.keys():
@@ -128,4 +131,10 @@ class DAG:
             print(f"No runtime for {model}")
             return None
         return run_time
+    
+    def log_to_run_time(self, log_file:str)->None:
+        df = LogParser(log_file).parse_logs()
+        run_time = df[['model_name', 'run_time']].to_dict(as_series=False)
+        for model, run_time in zip(run_time['model_name'], run_time['run_time']):
+            self._run_time_lookup[model] = run_time # overwrites existing runtimes
     
