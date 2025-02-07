@@ -296,3 +296,34 @@ class DAGTest(unittest.TestCase):
             "thread": [0, 1, 0, 2, 1]
         })
         assert_frame_equal(expected, actual, check_dtypes=False)
+
+    def test_to_df_all(self):
+        d = DAG(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        actual = d.to_df().head(5)
+        expected = pl.DataFrame(data={
+            "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
+            "run_time": [3.92, 2.46, 3.32, 4.67, 5.37],
+            "relative_start_time": [td(seconds=0), td(seconds=3, milliseconds=460), td(seconds=6, milliseconds=600), td(seconds=9, milliseconds=250), td(seconds=14, milliseconds=550)],
+            "relative_end_time": [td(seconds=3, milliseconds=920), td(seconds=5, milliseconds=920), td(seconds=9, milliseconds=920), td(seconds=13, milliseconds=920), td(seconds=19, milliseconds=920)],
+            "thread": [0, 1, 0, 1, 0]
+        })
+        assert_frame_equal(expected, actual, check_dtypes=False)
+
+    def test_to_df_citical_path(self):
+        d = DAG(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        actual = d.to_df(critical_path_model="order_wide")
+        print(actual)
+        expected = pl.DataFrame(data={
+            "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
+            "run_time": [7.21, 10.21, 4.5, 12.33],
+            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
+            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
+            "thread": [0, 0, 0, 1]
+        })
+        assert_frame_equal(expected, actual, check_dtypes=False)

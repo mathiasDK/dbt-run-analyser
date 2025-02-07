@@ -84,9 +84,6 @@ class DAG:
         
         # Add the target node to the current path
         path = [target] + path
-
-        print("target:", target)
-        print("path", path)
         
         # If the target node has no incoming edges, return the current path
         if target not in self.node_parents:
@@ -135,7 +132,6 @@ class DAG:
         run_time = self._run_time_lookup.get(model)
         if run_time is None:
             print(f"No runtime for {model}")
-            return None
         return run_time
     
     def manifest_to_nodes(self, manifest_path:str)->None:
@@ -164,16 +160,24 @@ class DAG:
                     parellel_processing[m] = {"end_time": row["relative_end_time"]}
                     df[idx, "thread"] = m
                     break
-        print(df.head())
         return df
     
     def to_df(self, critical_path_model:str=None)->pl.DataFrame:
         nodes = None
         if critical_path_model:
-            nodes = self.get_critial_path(critical_path_model)[0]["path"]
+            critical_path_model = self.get_critial_path(critical_path_model)
+            first_model = list(critical_path_model.keys())[0]
+            nodes = critical_path_model.get(first_model).get("path")
         
         if nodes is not None:
-            df = self.df.filter(pl.col("model_name").isin(nodes))
+            df = self.df.filter(pl.col("model_name").is_in(nodes))
+            # Reset the relative start time
+            first_start_time = df["relative_start_time"].min()
+            df = df.with_columns(
+                (pl.col("relative_start_time") - first_start_time).alias("relative_start_time"),
+                (pl.col("relative_end_time") - first_start_time).alias("relative_end_time"),
+            )
+            # Should relative start time be the previous relative end time?
         else:
             df = self.df
 
