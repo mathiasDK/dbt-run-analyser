@@ -1,6 +1,7 @@
 from .node import Node
 from .utils.manifest_parser import manifest_parser
 from .utils.log_parser import LogParser
+import polars as pl
 
 class DAG:
     def __init__(self, manifest_path:str=None, log_file:str=None):
@@ -8,6 +9,7 @@ class DAG:
         self.node_children = {}
         self.node_parents = {}
         self._run_time_lookup = {}
+        self.df = pl.DataFrame()
 
         if manifest_path:
             self.manifest_to_nodes(manifest_path)
@@ -146,4 +148,35 @@ class DAG:
         run_time = df[['model_name', 'run_time']].to_dict(as_series=False)
         for model, run_time in zip(run_time['model_name'], run_time['run_time']):
             self._run_time_lookup[model] = run_time # overwrites existing runtimes
+        self.df = df
+
+    def _estimate_thread(self, df:pl.DataFrame)->pl.DataFrame:
+        df = df.sort(by=["relative_start_time", "relative_end_time"])
+        df = df.with_columns(thread = pl.lit(0))
+
+        parellel_processing = {k: {"end_time": None} for k in range(200)} # Setting an arbitrary max number of threads
+        d = df.rows_by_key(key=["model_name"], named=True)
+
+        for idx, (model_name, row) in enumerate(d.items()):
+            row = row[0]
+            for m, v in parellel_processing.items():
+                if v["end_time"] is None or v.get("end_time") < row["relative_start_time"]:
+                    parellel_processing[m] = {"end_time": row["relative_end_time"]}
+                    df[idx, "thread"] = m
+                    break
+        print(df.head())
+        return df
+    
+    def to_df(self, critical_path_model:str=None)->pl.DataFrame:
+        nodes = None
+        if critical_path_model:
+            nodes = self.get_critial_path(critical_path_model)[0]["path"]
+        
+        if nodes is not None:
+            df = self.df.filter(pl.col("model_name").isin(nodes))
+        else:
+            df = self.df
+
+        df = self._estimate_thread(df)
+        return df
     
