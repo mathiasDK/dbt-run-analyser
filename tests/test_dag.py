@@ -227,3 +227,27 @@ class DAGTest(unittest.TestCase):
             "dim_customer", "dim_store", "fct_order", "order_wide",
         ])
         self.assertEqual(expected, actual)
+
+    def test_init_log_file(self):
+        d = DAG(log_file="test_data/cli_output/dbt_1_thread.log")
+        expected_run_time = {
+            "e_order_event_1": 3.92, 
+            "e_order_event_2": 2.46
+        }
+        for model, expected_run_time in expected_run_time.items():
+            self.assertEqual(expected_run_time, d.get_run_time(model))
+
+    def test_add_run_time(self):
+        d = DAG()
+        d.log_to_run_time("test_data/cli_output/dbt_1_thread.log")
+        expected_run_time = {
+            "e_order_event_1": 3.92, 
+            "e_order_event_2": 2.46
+        }
+        for model, expected_run_time in expected_run_time.items():
+            self.assertEqual(expected_run_time, d.get_run_time(model))
+
+    def test_model_without_runtime(self):
+        d = DAG()
+        d.log_to_run_time("test_data/cli_output/dbt_1_thread.log")
+        self.assertIsNone(d.get_run_time("some_random_non_existing_model"))
