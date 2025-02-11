@@ -164,6 +164,8 @@ class DAG:
     
     def to_df(self, critical_path_model:str=None)->pl.DataFrame:
         nodes = None
+        if len(self.df) == 0:
+            raise ValueError("No logs found. Please provide a log file.")
         if critical_path_model:
             critical_path_model = self.get_critial_path(critical_path_model)
             first_model = list(critical_path_model.keys())[0]

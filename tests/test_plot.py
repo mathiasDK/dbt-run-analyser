@@ -6,12 +6,19 @@ from datetime import timedelta as td
 class DAGTest(unittest.TestCase):
 
     def test_no_data(self):
-        s = ShowDBTRun()
+        s = ShowDBTRun(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        s.df = pl.DataFrame()
         with self.assertRaises(Exception):
             s.plot_run_time()
     
     def test_add_run_time(self):
-        s = ShowDBTRun()
+        s = ShowDBTRun(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
         s._add_run_time(
             thread=0,
             start=0,
@@ -22,7 +29,10 @@ class DAGTest(unittest.TestCase):
         self.assertEqual(1, len(s.figure.layout.shapes))
 
     def test_add_run_times(self):
-        s = ShowDBTRun()
+        s = ShowDBTRun(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
         s.df = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
             "run_time": [7.21, 10.21, 4.5, 12.33],
@@ -34,7 +44,10 @@ class DAGTest(unittest.TestCase):
         self.assertEqual(4, len(s.figure.layout.shapes))
 
     def test_run_time_cutoff(self):
-        s = ShowDBTRun()
+        s = ShowDBTRun(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
         s.df = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
             "run_time": [7.21, 10.21, 4.5, 12.33],

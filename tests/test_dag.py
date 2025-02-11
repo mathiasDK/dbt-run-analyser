@@ -312,7 +312,7 @@ class DAGTest(unittest.TestCase):
         })
         assert_frame_equal(expected, actual, check_dtypes=False)
 
-    def test_to_df_citical_path(self):
+    def test_to_df_critical_path(self):
         d = DAG(
             manifest_path="test_data/manifest/manifest.json", 
             log_file="test_data/cli_output/dbt_1_thread.log"
