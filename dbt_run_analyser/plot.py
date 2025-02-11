@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 class ShowDBTRun(DAG):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.figure = go.Figure
+        self.figure = go.Figure()
 
     def plot_run_time(self, title:str=None, run_time_starting_point: int|float=0, run_time_highlight: int|float=1e6, run_time_show_model_name: int|float=1e6):
         if len(self.df)==0:
@@ -15,9 +15,10 @@ class ShowDBTRun(DAG):
             if start >= run_time_starting_point:
                 end = row["relative_end_time"].total_seconds()
                 thread = row["thread"]
-                fillcolor = "grey" if row["run_time"].total_seconds()<run_time_highlight else "red"
-                model_name = "" if row["run_time"].total_seconds()<run_time_show_model_name else row["model_name"]
-                self.__add_run_time(thread=thread, start=start, end=end, fillcolor=fillcolor, model_name=model_name)
+                fillcolor = "grey" if row["run_time"]<run_time_highlight else "red"
+                show_model_name = True if row["run_time"]<run_time_show_model_name else False
+                model_name = row["model_name"]
+                self._add_run_time(thread=thread, start=start, end=end, fillcolor=fillcolor, model_name=model_name, show_model_name=show_model_name)
         
         # Layout
         self.figure.update_layout(
@@ -27,9 +28,33 @@ class ShowDBTRun(DAG):
             title=title
         )
         return self.figure
+    
+    def plot_critical_path(self, critical_path_model:str, *args, **kwargs):
+        self.plot_run_time(*args, **kwargs)
+        d = self.get_critial_path(critical_path_model)
+        for _, v in d.items():
+            nodes = v["path"]
+            break
+        for node in nodes:
+            self._highlight_node(node)
+        return self.figure
+    
+    def _highlight_node(self, node:str)->None:
+        HIGHLIGHT_COLOR = "red"
+        
+        self.figure.update_shapes(
+            selector=dict(name=node),
+            fillcolor=HIGHLIGHT_COLOR,
+            label=dict(
+                text=node, 
+                font=dict(size=10),
+            ),
+        )
+        
 
-    def _add_run_time(self, thread, start, end, fillcolor, model_name:str="")->None:
+    def _add_run_time(self, thread, start, end, fillcolor, model_name:str="", show_model_name:bool=True)->None:
         self.figure.add_shape(
+            name=model_name,
             type="rect",
             x0=start,
             x1=end,
@@ -37,7 +62,7 @@ class ShowDBTRun(DAG):
             y1=thread+0.35,
             fillcolor=fillcolor,
             label=dict(
-                text=model_name, 
+                text=model_name if show_model_name else "", 
                 font=dict(size=10),
             ),
         )
