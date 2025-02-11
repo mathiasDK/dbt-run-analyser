@@ -7,7 +7,7 @@ class ShowDBTRun(DAG):
         self.figure = go.Figure()
         self.df = self.to_df()
 
-    def plot_run_time(self, title:str=None, run_time_starting_point: int|float=0, run_time_highlight: int|float=1e6, run_time_show_model_name: int|float=1e6):
+    def plot_run_time(self, title:str=None, run_time_starting_point: int|float=0, run_time_highlight: int|float=1e6, run_time_show_model_name: int|float=0):
         if len(self.df)==0:
             raise Exception("You must add data before you can plot.")
         
@@ -16,7 +16,7 @@ class ShowDBTRun(DAG):
             if start >= run_time_starting_point:
                 end = row["relative_end_time"].total_seconds()
                 thread = row["thread"]
-                fillcolor = "grey" if row["run_time"]<run_time_highlight else "red"
+                fillcolor = "#c2c2c2" if row["run_time"]<run_time_highlight else "#D73809"
                 show_model_name = True if row["run_time"]>=run_time_show_model_name else False
                 model_name = row["model_name"]
                 self._add_run_time(thread=thread, start=start, end=end, fillcolor=fillcolor, model_name=model_name, show_model_name=show_model_name)
@@ -41,7 +41,7 @@ class ShowDBTRun(DAG):
         return self.figure
     
     def _highlight_node(self, node:str)->None:
-        HIGHLIGHT_COLOR = "orange"
+        HIGHLIGHT_COLOR = "#940C08"
         
         self.figure.update_shapes(
             selector=dict(name=node),
@@ -50,6 +50,7 @@ class ShowDBTRun(DAG):
                 text=node, 
                 font=dict(size=10),
             ),
+            opacity=1
         )
         
 
@@ -62,6 +63,7 @@ class ShowDBTRun(DAG):
             y0=thread-0.35,
             y1=thread+0.35,
             fillcolor=fillcolor,
+            opacity=1,
             label=dict(
                 text=model_name if show_model_name else "", 
                 font=dict(size=10),

@@ -73,7 +73,7 @@ class DAGTest(unittest.TestCase):
         fig = s.plot_run_time()
         s._highlight_node("e_order_event_7")
         actual_shape_colors = [shape.fillcolor for shape in fig.layout.shapes]
-        expected_shape_colors = ["orange", "grey", "grey", "grey"]
+        expected_shape_colors = ["#940C08", "#c2c2c2", "#c2c2c2", "#c2c2c2"]
         self.assertEqual(expected_shape_colors, actual_shape_colors)
 
     def test_highlight_critical_path(self):
@@ -90,5 +90,5 @@ class DAGTest(unittest.TestCase):
         })
         s.plot_critical_path("e_order_event_7")
         actual_shape_colors = [shape.fillcolor for shape in s.figure.layout.shapes]
-        expected_shape_colors = ["orange", "grey", "grey", "grey"]
+        expected_shape_colors = ["#940C08", "#c2c2c2", "#c2c2c2", "#c2c2c2"]
         self.assertEqual(expected_shape_colors, actual_shape_colors)
