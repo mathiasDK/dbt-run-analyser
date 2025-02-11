@@ -5,6 +5,7 @@ class ShowDBTRun(DAG):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.figure = go.Figure()
+        self.df = self.to_df()
 
     def plot_run_time(self, title:str=None, run_time_starting_point: int|float=0, run_time_highlight: int|float=1e6, run_time_show_model_name: int|float=1e6):
         if len(self.df)==0:
@@ -16,15 +17,15 @@ class ShowDBTRun(DAG):
                 end = row["relative_end_time"].total_seconds()
                 thread = row["thread"]
                 fillcolor = "grey" if row["run_time"]<run_time_highlight else "red"
-                show_model_name = True if row["run_time"]<run_time_show_model_name else False
+                show_model_name = True if row["run_time"]>=run_time_show_model_name else False
                 model_name = row["model_name"]
                 self._add_run_time(thread=thread, start=start, end=end, fillcolor=fillcolor, model_name=model_name, show_model_name=show_model_name)
         
         # Layout
         self.figure.update_layout(
             template="simple_white",
-            yaxis=dict(range=[-0.5, self.df["thread"].max()+0.5], title="Thread"),
-            xaxis=dict(title="Run time (s)"),
+            yaxis=dict(range=[-0.5, self.df["thread"].max()+0.5], title="Thread", type="category"),
+            xaxis=dict(title="Run time (s)", range=[0, self.df["relative_end_time"].max().total_seconds()]),
             title=title
         )
         return self.figure
@@ -40,7 +41,7 @@ class ShowDBTRun(DAG):
         return self.figure
     
     def _highlight_node(self, node:str)->None:
-        HIGHLIGHT_COLOR = "red"
+        HIGHLIGHT_COLOR = "orange"
         
         self.figure.update_shapes(
             selector=dict(name=node),
