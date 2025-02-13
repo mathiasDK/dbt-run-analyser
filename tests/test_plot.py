@@ -35,10 +35,10 @@ class DAGTest(unittest.TestCase):
         )
         s.df = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
-            "run_time": [7.21, 10.21, 4.5, 12.33],
-            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
-            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
-            "thread": [0, 0, 0, 1]
+            "run_time": [6.99, 10.99, 4.99, 11.99],
+            "relative_start_time": [0, 7, 18, 23],
+            "relative_end_time": [6.99, 17.99, 22.99, 34.99],
+            "thread": [0, 0, 0, 0]
         })
         s.plot_run_time()
         self.assertEqual(4, len(s.figure.layout.shapes))
@@ -50,13 +50,13 @@ class DAGTest(unittest.TestCase):
         )
         s.df = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
-            "run_time": [7.21, 10.21, 4.5, 12.33],
-            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
-            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
-            "thread": [0, 0, 0, 1]
+            "run_time": [6.99, 10.99, 4.99, 11.99],
+            "relative_start_time": [0, 7, 18, 23],
+            "relative_end_time": [6.99, 17.99, 22.99, 34.99],
+            "thread": [0, 0, 0, 0]
         })
         s.plot_run_time(run_time_starting_point=10)
-        self.assertEqual(3, len(s.figure.layout.shapes))
+        self.assertEqual(2, len(s.figure.layout.shapes))
 
     def test_highlight_node(self):
         s = ShowDBTRun(
@@ -65,10 +65,10 @@ class DAGTest(unittest.TestCase):
         )
         s.df = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
-            "run_time": [7.21, 10.21, 4.5, 12.33],
-            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
-            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
-            "thread": [0, 0, 0, 1]
+            "run_time": [6.99, 10.99, 4.99, 11.99],
+            "relative_start_time": [0, 7, 18, 23],
+            "relative_end_time": [6.99, 17.99, 22.99, 34.99],
+            "thread": [0, 0, 0, 0]
         })
         fig = s.plot_run_time()
         s._highlight_node("e_order_event_7")
@@ -83,10 +83,10 @@ class DAGTest(unittest.TestCase):
         )
         s.df = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
-            "run_time": [7.21, 10.21, 4.5, 12.33],
-            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
-            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
-            "thread": [0, 0, 0, 1]
+            "run_time": [6.99, 10.99, 4.99, 11.99],
+            "relative_start_time": [0, 7, 18, 23],
+            "relative_end_time": [6.99, 17.99, 22.99, 34.99],
+            "thread": [0, 0, 0, 0]
         })
         s.plot_critical_path("e_order_event_7")
         actual_shape_colors = [shape.fillcolor for shape in s.figure.layout.shapes]

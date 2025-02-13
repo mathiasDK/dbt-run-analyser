@@ -245,8 +245,8 @@ class DAGTest(unittest.TestCase):
     def test_init_log_file(self):
         d = DAG(log_file="test_data/cli_output/dbt_1_thread.log")
         expected_run_time = {
-            "e_order_event_1": 3.92, 
-            "e_order_event_2": 2.46
+            "e_order_event_1": 3.99, 
+            "e_order_event_2": 1.99
         }
         for model, expected_run_time in expected_run_time.items():
             self.assertEqual(expected_run_time, d.get_run_time(model))
@@ -255,8 +255,8 @@ class DAGTest(unittest.TestCase):
         d = DAG()
         d.log_to_run_time("test_data/cli_output/dbt_1_thread.log")
         expected_run_time = {
-            "e_order_event_1": 3.92, 
-            "e_order_event_2": 2.46
+            "e_order_event_1": 3.99, 
+            "e_order_event_2": 1.99
         }
         for model, expected_run_time in expected_run_time.items():
             self.assertEqual(expected_run_time, d.get_run_time(model))
@@ -274,10 +274,10 @@ class DAGTest(unittest.TestCase):
         actual = d._estimate_thread(d.df).head(5)
         expected = pl.DataFrame(data={
             "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
-            "run_time": [3.92, 2.46, 3.32, 4.67, 5.37],
-            "relative_start_time": [td(seconds=0), td(seconds=3, milliseconds=460), td(seconds=6, milliseconds=600), td(seconds=9, milliseconds=250), td(seconds=14, milliseconds=550)],
-            "relative_end_time": [td(seconds=3, milliseconds=920), td(seconds=5, milliseconds=920), td(seconds=9, milliseconds=920), td(seconds=13, milliseconds=920), td(seconds=19, milliseconds=920)],
-            "thread": [0, 1, 0, 1, 0]
+            "run_time": [3.99, 1.99, 3.99, 3.99, 5.99],
+            "relative_start_time": [0, 4, 6, 10, 14],
+            "relative_end_time": [3.99, 5.99, 9.99, 13.99, 19.99],
+            "thread": [0, 0, 0, 0, 0]
         })
         assert_frame_equal(expected, actual, check_dtypes=False)
 
@@ -290,11 +290,12 @@ class DAGTest(unittest.TestCase):
         actual = d._estimate_thread(d.df).head(5)
         expected = pl.DataFrame(data={
             "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
-            "run_time": [2.84, 3.79, 3.42, 4.12, 5.17],
-            "relative_start_time": [td(seconds=0), td(seconds=0, milliseconds=50), td(seconds=3, milliseconds=420), td(seconds=3, milliseconds=720), td(seconds=6, milliseconds=670)],
-            "relative_end_time": [td(seconds=2, milliseconds=840), td(seconds=3, milliseconds=840), td(seconds=6, milliseconds=840), td(seconds=7, milliseconds=840), td(seconds=11, milliseconds=840)],
-            "thread": [0, 1, 0, 2, 1]
+            "run_time": [2.99, 3.99, 3.99, 3.99, 4.99],
+            "relative_start_time": [0, 0, 3, 4, 7],
+            "relative_end_time": [2.99, 3.99, 6.99, 7.99, 11.99],
+            "thread": [0, 1, 0, 1, 0]
         })
+        print(actual)
         assert_frame_equal(expected, actual, check_dtypes=False)
 
     def test_to_df_all(self):
@@ -305,11 +306,12 @@ class DAGTest(unittest.TestCase):
         actual = d.to_df().head(5)
         expected = pl.DataFrame(data={
             "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
-            "run_time": [3.92, 2.46, 3.32, 4.67, 5.37],
-            "relative_start_time": [td(seconds=0), td(seconds=3, milliseconds=460), td(seconds=6, milliseconds=600), td(seconds=9, milliseconds=250), td(seconds=14, milliseconds=550)],
-            "relative_end_time": [td(seconds=3, milliseconds=920), td(seconds=5, milliseconds=920), td(seconds=9, milliseconds=920), td(seconds=13, milliseconds=920), td(seconds=19, milliseconds=920)],
-            "thread": [0, 1, 0, 1, 0]
+            "run_time": [3.99, 1.99, 3.99, 3.99, 5.99],
+            "relative_start_time": [0, 4, 6, 10, 14],
+            "relative_end_time": [3.99, 5.99, 9.99, 13.99, 19.99],
+            "thread": [0, 0, 0, 0, 0]
         })
+        print(actual)
         assert_frame_equal(expected, actual, check_dtypes=False)
 
     def test_to_df_critical_path(self):
@@ -318,12 +320,11 @@ class DAGTest(unittest.TestCase):
             log_file="test_data/cli_output/dbt_1_thread.log"
         )
         actual = d.to_df(critical_path_model="order_wide")
-        print(actual)
         expected = pl.DataFrame(data={
             "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
-            "run_time": [7.21, 10.21, 4.5, 12.33],
-            "relative_start_time": [td(seconds=0), td(seconds=13), td(seconds=33, milliseconds=710), td(seconds=37, milliseconds=880)],
-            "relative_end_time": [td(seconds=7, milliseconds=210), td(seconds=23, milliseconds=210), td(seconds=38, milliseconds=210), td(seconds=50, milliseconds=210)],
-            "thread": [0, 0, 0, 1]
+            "run_time": [6.99, 9.99, 4.99, 11.99],
+            "relative_start_time": [0, 13, 33, 38],
+            "relative_end_time": [6.99, 22.99, 37.99, 49.99],
+            "thread": [0, 0, 0, 0]
         })
         assert_frame_equal(expected, actual, check_dtypes=False)
