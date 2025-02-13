@@ -12,9 +12,9 @@ class ShowDBTRun(DAG):
             raise Exception("You must add data before you can plot.")
         
         for row in self.df.iter_rows(named=True):
-            start = row["relative_start_time"].total_seconds()
+            start = row["relative_start_time"]
             if start >= run_time_starting_point:
-                end = row["relative_end_time"].total_seconds()
+                end = row["relative_end_time"]
                 thread = row["thread"]
                 fillcolor = "#c2c2c2" if row["run_time"]<run_time_highlight else "#D73809"
                 show_model_name = True if row["run_time"]>=run_time_show_model_name else False
@@ -25,7 +25,7 @@ class ShowDBTRun(DAG):
         self.figure.update_layout(
             template="simple_white",
             yaxis=dict(range=[-0.5, self.df["thread"].max()+0.5], title="Thread", type="category"),
-            xaxis=dict(title="Run time (s)", range=[0, self.df["relative_end_time"].max().total_seconds()]),
+            xaxis=dict(title="Run time (s)", range=[0, self.df["relative_end_time"].max()]),
             title=title
         )
         return self.figure
