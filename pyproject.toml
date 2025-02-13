@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "pandas>=2.2",
+    "plotly>=6.0",
 ] 
 
 [project.urls]
@@ -46,7 +47,7 @@ testpaths = [
 ]
 
 [tool.hatch.build.targets.sdist]
-exclude = ["docs*", "logs*", "quantum*", "test_data*"]
+exclude = ["docs*", "logs*", "quantum*", "test_data*", "examples*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["dbt_run_analyser"]
