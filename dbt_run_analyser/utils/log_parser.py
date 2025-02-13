@@ -15,34 +15,42 @@ class LogParser:
         pattern = r'(\d{2}:\d{2}:\d{2})'
         t = re.findall(pattern, s)
         if isinstance(t, list): # if there are multiple timestampls
-            t = t[0]
+            t = t[-1]
         t = "2025-01-01 " + t
         t = datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S") # converting to datetime object
         return t
     
     def _parse_model_name(self, s:str):
-        pattern = r'\w*\s\.'
-        model_name = re.findall(pattern, s)[0][:-2]
+        pattern = r'\s\w+\.(\w+)\s'
+        model_name = re.findall(pattern, s)
+        if len(model_name) == 0:
+            return None
 
-        # Find all matches
-        return model_name
+        return model_name[0]
     
     def parse_logs(self):
         start_times = {}
         
         results = []
         for s in self.log_data.split("\n"):
-            if "START" in s:
+            if " START " in s:
                 start_time = self._parse_timestamp(s)
                 model_name = self._parse_model_name(s)
-                start_times[model_name] = start_time
+                if model_name is not None:
+                    start_times[model_name] = start_time
             if "OK created" in s:
                 end_time = self._parse_timestamp(s)
                 model_name = self._parse_model_name(s)
+                if model_name is None:
+                    continue
 
                 start_time = start_times.get(model_name)
-                if end_time < start_time: # If the end time is less than the start time, it means the model ran into the next day
-                    end_time += datetime.timedelta(days=1)
+                try:
+                    if end_time < start_time: # If the end time is less than the start time, it means the model ran into the next day
+                        end_time += datetime.timedelta(days=1)
+                except TypeError:
+                    print(f"Model {model_name} does not have a start time")
+                    continue
                 end_time += datetime.timedelta(milliseconds=-10) # Doing this to avoid overlapping of time
                 run_time = (end_time - start_time).total_seconds()
                 
@@ -63,10 +71,4 @@ class LogParser:
         
         return df
 
-if __name__ == "__main__":
-    path = "test_data/cli_output/dbt_1_thread.log"
-    l = LogParser(path)
-    d = l.parse_logs()
-    print(d.head(10))
-    print(d.tail(5))
     
