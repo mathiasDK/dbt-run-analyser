@@ -58,6 +58,27 @@ class DAGTest(unittest.TestCase):
         s.plot_run_time(run_time_starting_point=10)
         self.assertEqual(2, len(s.figure.layout.shapes))
 
+    def test_run_time_show_model_name(self):
+        s = ShowDBTRun(
+            manifest_path="test_data/manifest/manifest.json", 
+            log_file="test_data/cli_output/dbt_1_thread.log"
+        )
+        s.df = pl.DataFrame(data={
+            "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
+            "run_time": [6.99, 10.99, 4.99, 11.99],
+            "relative_start_time": [0, 7, 18, 23],
+            "relative_end_time": [6.99, 17.99, 22.99, 34.99],
+            "thread": [0, 0, 0, 0]
+        })
+        s.plot_run_time(run_time_show_model_name=10)
+
+        cnt = 0
+        for s in s.figure.layout.shapes:
+            # There should only be text on two of the shapes which have run_time >= 10
+            if s.label.text is not None:
+                cnt += 1
+        self.assertEqual(2, cnt)
+
     def test_highlight_node(self):
         s = ShowDBTRun(
             manifest_path="test_data/manifest/manifest.json", 

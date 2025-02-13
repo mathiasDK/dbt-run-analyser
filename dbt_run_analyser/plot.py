@@ -25,7 +25,7 @@ class ShowDBTRun(DAG):
         self.figure.update_layout(
             template="simple_white",
             yaxis=dict(range=[-0.5, self.df["thread"].max()+0.5], title="Thread", type="category"),
-            xaxis=dict(title="Run time (s)", range=[0, self.df["relative_end_time"].max()]),
+            xaxis=dict(title="Run time (s)", range=[run_time_starting_point, self.df["relative_end_time"].max()]),
             title=title
         )
         return self.figure
@@ -48,7 +48,7 @@ class ShowDBTRun(DAG):
             fillcolor=HIGHLIGHT_COLOR,
             label=dict(
                 text=node, 
-                font=dict(size=10),
+                font=dict(size=10, color="#ddd"),
             ),
             opacity=1
         )
@@ -65,7 +65,7 @@ class ShowDBTRun(DAG):
             fillcolor=fillcolor,
             opacity=1,
             label=dict(
-                text=model_name if show_model_name else "", 
+                text=model_name if show_model_name else None, 
                 font=dict(size=10),
             ),
         )

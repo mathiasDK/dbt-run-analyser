@@ -186,6 +186,48 @@ class DAGTest(unittest.TestCase):
         expected = [['e_orders_legacy', 'fct_orders', 'order_conversion'], ['e_orders', 'stg_orders', 'order_conversion'], ['e_orders_legacy', 'stg_orders', 'order_conversion']]
         self.assertEqual(expected, actual)
 
+    def test_get_critical_paths(self):
+        node_dict = {
+            "e_orders": Node("e_orders", children="stg_orders", run_time=2),
+            "e_orders_legacy": Node("e_orders_legacy", children="stg_orders", run_time=3),
+            "stg_orders": Node("stg_orders", parents=["e_orders", "e_orders_legacy"], children=["fct_orders"], run_time=1),
+            "fct_orders": Node("fct_orders", parents=["e_orders_legacy"], run_time=10),
+            "order_conversion": Node("order_conversion", parents=["fct_orders", "stg_orders"], run_time=2),
+        }
+        d = DAG()
+        d.bulk_add_nodes(nodes=node_dict)
+        actual = d.get_critial_paths("order_conversion")
+        expected = {
+            'e_orders_legacy fct_orders order_conversion': {
+                'path': ['e_orders_legacy', 'fct_orders', 'order_conversion'], 
+                'total_run_time': 15, 
+                'run_time_dict': {
+                    'fct_orders': 10, 
+                    'e_orders_legacy': 3, 
+                    'order_conversion': 2
+                }
+            }, 
+            'e_orders_legacy stg_orders order_conversion': {
+                'path': ['e_orders_legacy', 'stg_orders', 'order_conversion'], 
+                'total_run_time': 6, 
+                'run_time_dict': {
+                    'e_orders_legacy': 3, 
+                    'order_conversion': 2, 
+                    'stg_orders': 1
+                }
+            }, 
+            'e_orders stg_orders order_conversion': {
+                'path': ['e_orders', 'stg_orders', 'order_conversion'], 
+                'total_run_time': 5, 
+                'run_time_dict': {
+                    'e_orders': 2, 
+                    'order_conversion': 2, 
+                    'stg_orders': 1
+                }
+            }
+        }
+        self.assertEqual(expected, actual)
+
     def test_get_critical_path(self):
         node_dict = {
             "e_orders": Node("e_orders", children="stg_orders", run_time=2),
@@ -198,24 +240,15 @@ class DAGTest(unittest.TestCase):
         d.bulk_add_nodes(nodes=node_dict)
         actual = d.get_critial_path("order_conversion")
         expected = {
-            'e_orders_legacy': {
-                'path': ['e_orders_legacy', 'stg_orders', 'order_conversion'], 
-                'total_run_time': 6, 
+            'e_orders_legacy fct_orders order_conversion': {
+                'path': ['e_orders_legacy', 'fct_orders', 'order_conversion'], 
+                'total_run_time': 15, 
                 'run_time_dict': {
+                    'fct_orders': 10,
                     'e_orders_legacy': 3, 
                     'order_conversion': 2, 
-                    'stg_orders': 1
                 }
             }, 
-            'e_orders': {
-                'path': ['e_orders', 'stg_orders', 'order_conversion'], 
-                'total_run_time': 5, 
-                'run_time_dict': {
-                    'e_orders': 2, 
-                    'order_conversion': 2, 
-                    'stg_orders': 1
-                }
-            }
         }
         self.assertEqual(expected, actual)
 
@@ -264,7 +297,7 @@ class DAGTest(unittest.TestCase):
     def test_model_without_runtime(self):
         d = DAG()
         d.log_to_run_time("test_data/cli_output/dbt_1_thread.log")
-        self.assertIsNone(d.get_run_time("some_random_non_existing_model"))
+        self.assertEqual(0, d.get_run_time("some_random_non_existing_model"))
 
     def test_estimate_thread_1(self):
         d = DAG(
@@ -321,10 +354,10 @@ class DAGTest(unittest.TestCase):
         )
         actual = d.to_df(critical_path_model="order_wide")
         expected = pl.DataFrame(data={
-            "model_name": ["e_order_event_7","stg_order","fct_order","order_wide"],
-            "run_time": [6.99, 9.99, 4.99, 11.99],
-            "relative_start_time": [0, 13, 33, 38],
-            "relative_end_time": [6.99, 22.99, 37.99, 49.99],
+            "model_name": ["e_order_event_7","stg_order","dim_customer","order_wide"],
+            "run_time": [6.99, 9.99, 7.99, 11.99],
+            "relative_start_time": [0, 13, 23, 38],
+            "relative_end_time": [6.99, 22.99, 30.99, 49.99],
             "thread": [0, 0, 0, 0]
         })
         assert_frame_equal(expected, actual, check_dtypes=False)

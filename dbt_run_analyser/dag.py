@@ -104,7 +104,7 @@ class DAG:
                     
         return paths
     
-    def get_critial_path(self, model=None):
+    def get_critial_paths(self, model=None):
         if model is None:
             return None
         
@@ -115,7 +115,8 @@ class DAG:
             total_run_time = sum(self.get_run_time(node) for node in path)
             run_time_dict = {node: self.get_run_time(node) for node in path}
             run_time_dict = {k: v for k, v in sorted(run_time_dict.items(), key=lambda item: item[1], reverse=True)}
-            output[path[0]] = {
+            path_string = " ".join(path)
+            output[path_string] = {
                 'path': path,
                 'total_run_time': total_run_time,
                 'run_time_dict': run_time_dict
@@ -123,6 +124,11 @@ class DAG:
         output = {k: v for k, v in sorted(output.items(), key=lambda item: item[1]['total_run_time'], reverse=True)}
         
         return output
+    
+    def get_critial_path(self, model=None):
+        for path, v in self.get_critial_paths(model).items():
+            break
+        return {path: v}
 
     def get_inbetween_models(self, model=None):
         # check if a model exists in between others, e.g. a->b->c, a->c should highlight b.
@@ -132,6 +138,7 @@ class DAG:
         run_time = self._run_time_lookup.get(model)
         if run_time is None:
             print(f"No runtime for {model}")
+            return 0
         return run_time
     
     def manifest_to_nodes(self, manifest_path:str)->None:
