@@ -5,10 +5,13 @@ from polars.testing import assert_frame_equal
 from datetime import timedelta as td
 import datetime
 
+
 class ManifestParserTest(unittest.TestCase):
     def setUp(self):
         self.CLI_PATH_TO_1_THREAD_LOG = "test_data/cli_output/dbt_1_thread.log"
-        self.CLI_PATH_TO_1_THREAD_LOG_DATETIME = "test_data/cli_output/dbt_1_thread_datetime.log"
+        self.CLI_PATH_TO_1_THREAD_LOG_DATETIME = (
+            "test_data/cli_output/dbt_1_thread_datetime.log"
+        )
         self.CLI_PATH_TO_2_THREAD_LOG = "test_data/cli_output/dbt_2_thread.log"
         self.CLI_PATH_TO_3_THREAD_LOG = "test_data/cli_output/dbt_3_thread.log"
         self.CLI_PATH_TO_4_THREAD_LOG = "test_data/cli_output/dbt_4_thread.log"
@@ -49,24 +52,37 @@ class ManifestParserTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_log_parser(self):
-        expected = pl.DataFrame(data={
-            "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
-            "run_time": [3.99, 1.99, 3.99, 3.99, 5.99],
-            "relative_start_time": [0, 4, 6, 10, 14],
-            "relative_end_time": [3.99, 5.99, 9.99, 13.99, 19.99],
-        })
+        expected = pl.DataFrame(
+            data={
+                "model_name": [
+                    "e_order_event_1",
+                    "e_order_event_2",
+                    "e_order_event_3",
+                    "e_order_event_4",
+                    "e_order_event_5",
+                ],
+                "run_time": [3.99, 1.99, 3.99, 3.99, 5.99],
+                "relative_start_time": [0, 4, 6, 10, 14],
+                "relative_end_time": [3.99, 5.99, 9.99, 13.99, 19.99],
+            }
+        )
         actual = LogParser(self.CLI_PATH_TO_1_THREAD_LOG).parse_logs().head(5)
         assert_frame_equal(expected, actual)
 
     def test_log_parser_datetime(self):
-        expected = pl.DataFrame(data={
-            "model_name": ["e_order_event_1","e_order_event_2","e_order_event_3","e_order_event_4","e_order_event_5"],
-            "run_time": [3.99, 1.99, 3.99, 3.99, 5.99],
-            "relative_start_time": [0, 4, 6, 10, 14],
-            "relative_end_time": [3.99, 5.99, 9.99, 13.99, 19.99],
-        })
+        expected = pl.DataFrame(
+            data={
+                "model_name": [
+                    "e_order_event_1",
+                    "e_order_event_2",
+                    "e_order_event_3",
+                    "e_order_event_4",
+                    "e_order_event_5",
+                ],
+                "run_time": [3.99, 1.99, 3.99, 3.99, 5.99],
+                "relative_start_time": [0, 4, 6, 10, 14],
+                "relative_end_time": [3.99, 5.99, 9.99, 13.99, 19.99],
+            }
+        )
         actual = LogParser(self.CLI_PATH_TO_1_THREAD_LOG_DATETIME).parse_logs().head(5)
         assert_frame_equal(expected, actual)
-
-    
-    
