@@ -4,7 +4,24 @@ from .utils.log_parser import LogParser
 import polars as pl
 
 class DAG:
-    def __init__(self, manifest_path:str=None, log_file:str=None):
+    """
+    A class representing a Directed Acyclic Graph (DAG) for dbt models.
+    
+    Attributes:
+        nodes (dict): Dictionary of nodes in the DAG.
+        node_children (dict): Dictionary of node children.
+        node_parents (dict): Dictionary of node parents.
+        _run_time_lookup (dict): Dictionary of model run times.
+        df (pl.DataFrame): DataFrame containing model run times.
+    """
+    def __init__(self, manifest_path: str = None, log_file: str = None):
+        """
+        Initializes the DAG with optional manifest and log files.
+        
+        Args:
+            manifest_path (str, optional): Path to the dbt manifest file.
+            log_file (str, optional): Path to the log file.
+        """
         self.nodes = {}
         self.node_children = {}
         self.node_parents = {}
@@ -17,7 +34,13 @@ class DAG:
         if log_file:
             self.log_to_run_time(log_file)
 
-    def add_node(self, node:Node)->None:
+    def add_node(self, node: Node) -> None:
+        """
+        Adds a node to the DAG.
+        
+        Args:
+            node (Node): Node to add.
+        """
         if node.name in self.nodes.keys():
             print("The node with this name already exists. Remove it before adding it again.")
             return None
@@ -32,7 +55,13 @@ class DAG:
                 else:
                     self.node_children[parent].append(node.name)
 
-    def bulk_add_nodes(self, nodes:dict)->None:
+    def bulk_add_nodes(self, nodes: dict) -> None:
+        """
+        Adds multiple nodes to the DAG.
+        
+        Args:
+            nodes (dict): Dictionary of nodes to add.
+        """
         self.nodes.update(nodes)
         for node_name, node in nodes.items():
             if node.run_time:
@@ -53,7 +82,13 @@ class DAG:
                     else:
                         self.node_children[parent].append(node.name)
 
-    def remove_node(self, node:Node)->None:
+    def remove_node(self, node: Node) -> None:
+        """
+        Removes a node from the DAG.
+        
+        Args:
+            node (Node): Node to remove.
+        """
         if node.name not in self.nodes.keys():
             print("The node does not exist. Add it through the add_note() method.")
             return None
@@ -63,13 +98,23 @@ class DAG:
             for parent in node.parents:
                 self.node_children[parent].remove(node.name)
 
-    # def get_children_names(self, table_name: str)->list[str]:
+    # def get_children_names(self, table_name: str) -> list[str]:
     #     return self.node_children[table_name]
     
-    # def get_parent_names(self, table_name: str)->list[str]:
+    # def get_parent_names(self, table_name: str) -> list[str]:
     #     return self.node_parents[table_name]
         
-    def get_upstream_dependencies(self, table_name:str, deps:list[str]=[]):
+    def get_upstream_dependencies(self, table_name: str, deps: list[str] = []):
+        """
+        Gets the upstream dependencies of a node.
+        
+        Args:
+            table_name (str): Name of the node.
+            deps (list[str], optional): List of dependencies.
+        
+        Returns:
+            list[str]: List of upstream dependencies.
+        """
         parents = self.node_parents[table_name]
         if parents is not None:
             for parent_name in self.node_parents[table_name]:
@@ -79,6 +124,17 @@ class DAG:
         return list(set(deps)) # ensures uniqueness
     
     def find_all_paths_to_node(self, target, path=None, paths=[]):
+        """
+        Finds all paths to a target node.
+        
+        Args:
+            target (str): Target node.
+            path (list[str], optional): Current path.
+            paths (list[list[str]], optional): List of paths.
+        
+        Returns:
+            list[list[str]]: List of paths to the target node.
+        """
         if path is None:
             path = []
         
@@ -105,6 +161,15 @@ class DAG:
         return paths
     
     def get_critial_paths(self, model=None):
+        """
+        Gets the paths to the model sorted by run time.
+        
+        Args:
+            model (str, optional): Name of the model.
+        
+        Returns:
+            dict: A sorted dictionary of paths.
+        """
         if model is None:
             return None
         
@@ -126,34 +191,79 @@ class DAG:
         return output
     
     def get_critial_path(self, model=None):
+        """
+        Gets the critical path for a model, i.e. the longest path to the model.
+        
+        Args:
+            model (str, optional): Name of the model.
+        
+        Returns:
+            dict: Dictionary containing the critical path.
+        """
         for path, v in self.get_critial_paths(model).items():
             break
         return {path: v}
 
     def get_inbetween_models(self, model=None):
+        """
+        Gets the models that exist between others.
+        
+        Args:
+            model (str, optional): Name of the model.
+        """
         # check if a model exists in between others, e.g. a->b->c, a->c should highlight b.
         pass
 
-    def get_run_time(self, model)->float:
+    def get_run_time(self, model) -> float:
+        """
+        Gets the run time of a model.
+        
+        Args:
+            model (str): Name of the model.
+        
+        Returns:
+            float: Run time of the model.
+        """
         run_time = self._run_time_lookup.get(model)
         if run_time is None:
             print(f"No runtime for {model}")
             return 0
         return run_time
     
-    def manifest_to_nodes(self, manifest_path:str)->None:
+    def manifest_to_nodes(self, manifest_path: str) -> None:
+        """
+        Converts a manifest file to nodes and adds them to the DAG.
+        
+        Args:
+            manifest_path (str): Path to the manifest file.
+        """
         nodes = manifest_parser(manifest_path)
         for node, parents in nodes.items():
             self.add_node(Node(name=node, parents=parents))
 
-    def log_to_run_time(self, log_file:str)->None:
+    def log_to_run_time(self, log_file: str) -> None:
+        """
+        Parses a log file and updates the run times of models.
+        
+        Args:
+            log_file (str): Path to the log file.
+        """
         df = LogParser(log_file).parse_logs()
         run_time = df[['model_name', 'run_time']].to_dict(as_series=False)
         for model, run_time in zip(run_time['model_name'], run_time['run_time']):
             self._run_time_lookup[model] = run_time # overwrites existing runtimes
         self.df = df
 
-    def _estimate_thread(self, df:pl.DataFrame)->pl.DataFrame:
+    def _estimate_thread(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+        Estimates the thread for each model run.
+        
+        Args:
+            df (pl.DataFrame): DataFrame containing model run times.
+        
+        Returns:
+            pl.DataFrame: DataFrame with estimated threads.
+        """
         df = df.sort(by=["relative_start_time", "relative_end_time"])
         df = df.with_columns(thread = pl.lit(0))
 
@@ -169,7 +279,16 @@ class DAG:
                     break
         return df
     
-    def to_df(self, critical_path_model:str=None)->pl.DataFrame:
+    def to_df(self, critical_path_model: str = None) -> pl.DataFrame:
+        """
+        Converts the DAG to a DataFrame.
+        
+        Args:
+            critical_path_model (str, optional): Name of the critical path model.
+        
+        Returns:
+            pl.DataFrame: DataFrame containing model run times.
+        """
         nodes = None
         if len(self.df) == 0:
             raise ValueError("No logs found. Please provide a log file.")
@@ -192,4 +311,3 @@ class DAG:
 
         df = self._estimate_thread(df)
         return df
-    

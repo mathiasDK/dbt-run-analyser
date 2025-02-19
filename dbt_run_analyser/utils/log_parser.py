@@ -3,24 +3,61 @@ import polars as pl
 import datetime
 
 class LogParser:
+    """
+    A class to parse log files and extract model run times.
+    
+    Attributes:
+        log_file (str): Path to the log file.
+        log_data (str): Content of the log file.
+    """
     def __init__(self, log_file):
+        """
+        Initializes the LogParser with the given log file.
+        
+        Args:
+            log_file (str): Path to the log file.
+        """
         self.log_file = log_file
         self.log_data = self._read_log()
     
     def _read_log(self):
+        """
+        Reads the log file and returns its content.
+        
+        Returns:
+            str: Content of the log file.
+        """
         with open(self.log_file, 'r') as file:
             return file.read()
         
-    def _parse_timestamp(self, s:str):
+    def _parse_timestamp(self, s: str):
+        """
+        Parses a timestamp from a log line.
+        
+        Args:
+            s (str): A line from the log file.
+        
+        Returns:
+            datetime.datetime: Parsed timestamp.
+        """
         pattern = r'(\d{2}:\d{2}:\d{2})'
         t = re.findall(pattern, s)
-        if isinstance(t, list): # if there are multiple timestampls
+        if isinstance(t, list): # if there are multiple timestamps
             t = t[-1]
         t = "2025-01-01 " + t
         t = datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S") # converting to datetime object
         return t
     
-    def _parse_model_name(self, s:str):
+    def _parse_model_name(self, s: str):
+        """
+        Parses a model name from a log line.
+        
+        Args:
+            s (str): A line from the log file.
+        
+        Returns:
+            str or None: Parsed model name or None if not found.
+        """
         pattern = r'\s\w+\.(\w+)\s'
         model_name = re.findall(pattern, s)
         if len(model_name) == 0:
@@ -29,6 +66,12 @@ class LogParser:
         return model_name[0]
     
     def parse_logs(self):
+        """
+        Parses the log data to extract model run times and returns a DataFrame.
+        
+        Returns:
+            pl.DataFrame: DataFrame containing model run times with relative start and end times.
+        """
         start_times = {}
         
         results = []
@@ -71,4 +114,3 @@ class LogParser:
         
         return df
 
-    
