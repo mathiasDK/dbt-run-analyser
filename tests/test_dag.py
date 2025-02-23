@@ -455,9 +455,18 @@ class DAGTest(unittest.TestCase):
                     "e_order_event_1",
                     "e_order_event_2",
                 ],
-                "run_time": [3.99, 1.99, ],
-                "relative_start_time": [0, 0, ],
-                "relative_end_time": [3.99, 1.99, ],
+                "run_time": [
+                    3.99,
+                    1.99,
+                ],
+                "relative_start_time": [
+                    0,
+                    0,
+                ],
+                "relative_end_time": [
+                    3.99,
+                    1.99,
+                ],
             }
         )
         actual = round(d.get_thread_utilisation(), 2)
@@ -472,12 +481,24 @@ class DAGTest(unittest.TestCase):
                     "e_order_event_1",
                     "e_order_event_2",
                 ],
-                "run_time": [3.99, 1.99, ],
-                "relative_start_time": [0, 0, ],
-                "relative_end_time": [3.99, 1.99, ],
-                "thread": [0, 1, ]
+                "run_time": [
+                    3.99,
+                    1.99,
+                ],
+                "relative_start_time": [
+                    0,
+                    0,
+                ],
+                "relative_end_time": [
+                    3.99,
+                    1.99,
+                ],
+                "thread": [
+                    0,
+                    1,
+                ],
             }
         )
-        actual = round(d.get_thread_utilisation(),2)
+        actual = round(d.get_thread_utilisation(), 2)
         expected = 0.75
         self.assertEqual(actual, expected)

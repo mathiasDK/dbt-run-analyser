@@ -335,17 +335,29 @@ class DAG:
         df = self._estimate_thread(df)
         return df
 
-    def get_thread_utilisation(self)->float:
+    def get_thread_utilisation(self) -> float:
+        """
+        Calculates how much the threads are being used, i.e. how well the run is being parallelised.
+
+        If a single model runs while no other models run it will return a low score, which is an indication of
+        a possibility for splitting that single long running model into multiple smaller models to better utilise
+        the threads.
+
+        Returns:
+            float: The utilisation %.
+        """
         if "thread" not in self.df.columns:
             self.df = self._estimate_thread(self.df)
 
         # Calculating the total run time capacity if it is perfectly parallellised
-        n_threads = self.df["thread"].max() + 1 # +1 since it starts at 0
+        n_threads = self.df["thread"].max() + 1  # +1 since it starts at 0
         complete_time = self.df["relative_end_time"].max()
         capacity = n_threads * complete_time
 
         # Calculating the actual run time
-        run_time = self.df["run_time"].round(0).sum() # ensuring that a run time of 3.99 seconds is converted to 4 seconds
+        run_time = (
+            self.df["run_time"].round(0).sum()
+        )  # ensuring that a run time of 3.99 seconds is converted to 4 seconds
 
         # Utilisation is the run time divided by capacity
         utilisation = run_time * 1.0 / capacity
