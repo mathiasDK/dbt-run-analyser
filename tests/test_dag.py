@@ -423,7 +423,6 @@ class DAGTest(unittest.TestCase):
                 "thread": [0, 0, 0, 0, 0],
             }
         )
-        print(actual)
         assert_frame_equal(expected, actual, check_dtypes=False)
 
     def test_to_df_critical_path(self):
@@ -447,3 +446,38 @@ class DAGTest(unittest.TestCase):
             }
         )
         assert_frame_equal(expected, actual, check_dtypes=False)
+
+    def test_get_utilisation_no_threads(self):
+        d = DAG()
+        d.df = pl.DataFrame(
+            data={
+                "model_name": [
+                    "e_order_event_1",
+                    "e_order_event_2",
+                ],
+                "run_time": [3.99, 1.99, ],
+                "relative_start_time": [0, 0, ],
+                "relative_end_time": [3.99, 1.99, ],
+            }
+        )
+        actual = round(d.get_thread_utilisation(), 2)
+        expected = 0.75
+        self.assertEqual(actual, expected)
+
+    def test_get_utilisation_threads(self):
+        d = DAG()
+        d.df = pl.DataFrame(
+            data={
+                "model_name": [
+                    "e_order_event_1",
+                    "e_order_event_2",
+                ],
+                "run_time": [3.99, 1.99, ],
+                "relative_start_time": [0, 0, ],
+                "relative_end_time": [3.99, 1.99, ],
+                "thread": [0, 1, ]
+            }
+        )
+        actual = round(d.get_thread_utilisation(),2)
+        expected = 0.75
+        self.assertEqual(actual, expected)
