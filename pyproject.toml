@@ -1,6 +1,6 @@
 [project]
 name = "dbt_run_analyser"
-version = "0.1.1"
+version = "0.2.0"
 description = "Python library to analyse thread utilisation for dbt runs."
 readme = "README.md"
 license = { text = "MIT" }
@@ -20,6 +20,7 @@ classifiers = [
 dependencies = [
     "pandas>=2.2",
     "plotly>=6.0",
+    "polars>=1.0",
 ] 
 
 [project.urls]
@@ -38,6 +39,9 @@ test = [
     "dbt-core==1.9.1",
     "dbt-duckdb==1.9.1",
 ]
+
+[project.scripts]
+dbt-run-analyser = "dbt_run_analyser.cli:cli"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
