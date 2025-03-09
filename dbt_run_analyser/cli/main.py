@@ -1,5 +1,6 @@
 import click
 from ..plot import ShowDBTRun
+from . import params as p
 
 @click.group()
 def cli():
@@ -9,12 +10,12 @@ def cli():
 SINGLE_MODEL_SELECTOR = ('-m', '--model')
 
 @click.command("plot-run-times")
-@click.argument('manifest_file', type=click.Path(exists=True))
-@click.argument('log_file', type=click.Path(exists=True))
-@click.option('--title', default='DBT Run Times', help='Title of the plot.')
-@click.option('--run_time_starting_point', default=0, help='Starting point of the run time. If there are a lot of models it can take some time to plot. By not plotting models before a specific starting point you can save some time.')
-@click.option('--run_time_highlight', default=1e6, help='Threshold to highlight run times. If the model run time is greater than this value, it will be highlighted.')
-@click.option('--run_time_show_model_name', default=0, help='Threshold to show model names. If the model run time is greater than this value, the model name will be shown.')
+@p.manifest_file
+@p.log_file
+@p.plot_title
+@p.run_time_starting_point
+@p.run_time_highlight
+@p.run_time_show_model_name
 def plot_run_times(manifest_file, log_file, title, run_time_starting_point, run_time_highlight, run_time_show_model_name):
     """Plot the run times of models using the manifest and log files."""
     show_run = ShowDBTRun(manifest_path=manifest_file, log_file=log_file)
@@ -22,13 +23,13 @@ def plot_run_times(manifest_file, log_file, title, run_time_starting_point, run_
     fig.show()
 
 @click.command("plot-critical-path")
-@click.argument('manifest_file', type=click.Path(exists=True))
-@click.argument('log_file', type=click.Path(exists=True))
-@click.option(*SINGLE_MODEL_SELECTOR, type=click.STRING)
-@click.option('--title', default='DBT Run Times', help='Title of the plot.')
-@click.option('--run_time_starting_point', default=0, help='Starting point of the run time. If there are a lot of models it can take some time to plot. By not plotting models before a specific starting point you can save some time.')
-@click.option('--run_time_highlight', default=1e6, help='Threshold to highlight run times. If the model run time is greater than this value, it will be highlighted.')
-@click.option('--run_time_show_model_name', default=0, help='Threshold to show model names. If the model run time is greater than this value, the model name will be shown.')
+@p.manifest_file
+@p.log_file
+@click.option(*SINGLE_MODEL_SELECTOR, type=click.STRING, help = "The models from which the critical path must be found.")
+@p.plot_title
+@p.run_time_starting_point
+@p.run_time_highlight
+@p.run_time_show_model_name
 def plot_critical_path(manifest_file, log_file, model, title, run_time_starting_point, run_time_highlight, run_time_show_model_name):
     """Plot the critical path of a model using the manifest and log files."""
     show_run = ShowDBTRun(manifest_path=manifest_file, log_file=log_file)
