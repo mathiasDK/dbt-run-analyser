@@ -1,5 +1,6 @@
 import click
-from ..plot import ShowDBTRun
+from dbt_run_analyser.plot import ShowDBTRun
+from dbt_run_analyser.dag import DAG
 from . import params as p
 
 @click.group()
@@ -36,12 +37,21 @@ def plot_critical_path(manifest_file, log_file, model, title, run_time_starting_
     fig = show_run.plot_critical_path(model, title=title, run_time_starting_point=run_time_starting_point, run_time_highlight=run_time_highlight, run_time_show_model_name=run_time_show_model_name)
     fig.show()
 
+@click.command("get-all-end-nodes")
+@p.manifest_file
+def get_all_end_nodes(manifest_file):
+    """Returning a list of all nodes which have no downstream dependencies."""
+    d = DAG(manifest_path=manifest_file)
+    return d.get_all_end_nodes()
+    
+
 @click.command("help")
 def help_command():
     """Show help information for the CLI."""
     click.echo(cli.get_help(click.Context(cli)))
 
 cli.add_command(plot_run_times)
+cli.add_command(plot_critical_path)
 cli.add_command(plot_critical_path)
 cli.add_command(help_command)
 
