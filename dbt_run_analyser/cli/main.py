@@ -52,7 +52,7 @@ def help_command():
 
 cli.add_command(plot_run_times)
 cli.add_command(plot_critical_path)
-cli.add_command(plot_critical_path)
+cli.add_command(get_all_end_nodes)
 cli.add_command(help_command)
 
 if __name__ == '__main__':

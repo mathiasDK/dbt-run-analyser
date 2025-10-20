@@ -1,6 +1,6 @@
 [project]
 name = "dbt_run_analyser"
-version = "0.3.0"
+version = "0.3.1"
 description = "Python library to analyse thread utilisation for dbt runs."
 readme = "README.md"
 license = { text = "MIT" }
