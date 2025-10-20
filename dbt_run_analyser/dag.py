@@ -126,6 +126,34 @@ class DAG:
                     deps.append(parent_name)
                     deps.extend(self.get_upstream_dependencies(parent_name, deps=deps))
         return list(set(deps))  # ensures uniqueness
+    
+    def get_downstream_dependencies(self, table_name: str, deps: list[str] = None):
+        """
+        Gets the downstream dependencies of a node.
+
+        Args:
+            table_name (str): Name of the node.
+            deps (list[str], optional): List of dependencies.
+
+        Returns:
+            list[str]: List of downstream dependencies.
+        """
+        deps = []
+        if table_name in self.node_children.keys():
+            children = self.node_children[table_name]
+            print("Children:", children)
+            if children is not None:
+                for children_name in self.node_children[table_name]:
+                    if children_name not in deps:
+                        deps.append(children_name)
+                        deps.extend(self.get_downstream_dependencies(children_name, deps=deps))
+        return list(set(deps))  # ensures uniqueness
+    
+    def get_all_end_nodes(self):
+        all_models = set(self.nodes)
+        models_with_downstream = set(self.node_children)
+        models_without_downstream = all_models - models_with_downstream
+        return models_without_downstream
 
     def find_all_paths_to_node(self, target, path=None, paths=[]):
         """

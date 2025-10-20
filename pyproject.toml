@@ -1,6 +1,6 @@
 [project]
 name = "dbt_run_analyser"
-version = "0.2.0"
+version = "0.3.0"
 description = "Python library to analyse thread utilisation for dbt runs."
 readme = "README.md"
 license = { text = "MIT" }
@@ -17,10 +17,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: Apache Software License",
 ]
+keywords = ["dbt_run_analyser"]
 dependencies = [
     "pandas>=2.2",
     "plotly>=6.0",
     "polars>=1.0",
+    "click"
 ] 
 
 [project.urls]
@@ -53,8 +55,8 @@ testpaths = [
 [tool.hatch.build.targets.sdist]
 exclude = ["docs*", "logs*", "quantum*", "test_data*", "examples*"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["dbt_run_analyser"]
+[tool.setuptools.packages.find]
+include = ["dbt_run_analyser"]
 
 [tool.black]
 line-length = 88

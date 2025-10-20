@@ -5,7 +5,6 @@ import polars as pl
 from polars.testing import assert_frame_equal
 from datetime import timedelta as td
 
-
 class DAGTest(unittest.TestCase):
 
     # @classmethod
@@ -139,6 +138,106 @@ class DAGTest(unittest.TestCase):
 
         expected = set(["fct_orders", "stg_orders", "e_orders_legacy", "e_orders"])
         actual = set(d.get_upstream_dependencies("order_conversion"))
+
+        assert expected == actual
+
+    def test_downstream_dependencies(self):
+        e_orders = Node("e_orders", children="stg_orders")
+        e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+        stg_orders = Node(
+            "stg_orders",
+            parents=["e_orders", "e_orders_legacy"],
+            children=["fct_orders"],
+        )
+        fct_orders = Node("fct_orders", parents=["stg_orders"], children="order_conversion")
+        order_conversion = Node(
+            "order_conversion", parents=["fct_orders", "stg_orders"]
+        )
+        d = DAG()
+        d.add_node(e_orders)
+        d.add_node(e_orders_legacy)
+        d.add_node(stg_orders)
+        d.add_node(fct_orders)
+        d.add_node(order_conversion)
+
+        expected = set(["fct_orders", "order_conversion"])
+        actual = set(d.get_downstream_dependencies("stg_orders"))
+
+        assert expected == actual
+
+    def test_downstream_dependencies_last(self):
+        e_orders = Node("e_orders", children="stg_orders")
+        e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+        stg_orders = Node(
+            "stg_orders",
+            parents=["e_orders", "e_orders_legacy"],
+            children=["fct_orders"],
+        )
+        fct_orders = Node("fct_orders", parents=["stg_orders"], children="order_conversion")
+        order_conversion = Node(
+            "order_conversion", parents=["fct_orders", "stg_orders"]
+        )
+        d = DAG()
+        d.add_node(e_orders)
+        d.add_node(e_orders_legacy)
+        d.add_node(stg_orders)
+        d.add_node(fct_orders)
+        d.add_node(order_conversion)
+
+        expected = []
+        actual = d.get_downstream_dependencies("order_conversion")
+
+        assert expected == actual
+
+    def test_get_all_end_nodes(self):
+        e_orders = Node("e_orders", children="stg_orders")
+        e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+        stg_orders = Node(
+            "stg_orders",
+            parents=["e_orders", "e_orders_legacy"],
+            children=["fct_orders"],
+        )
+        fct_orders = Node("fct_orders", parents=["stg_orders"], children="order_conversion")
+        order_conversion = Node(
+            "order_conversion", parents=["fct_orders", "stg_orders"]
+        )
+        d = DAG()
+        d.add_node(e_orders)
+        d.add_node(e_orders_legacy)
+        d.add_node(stg_orders)
+        d.add_node(fct_orders)
+        d.add_node(order_conversion)
+
+        expected = set(["order_conversion"])
+        actual = d.get_all_end_nodes()
+
+        assert expected == actual
+
+    def test_get_all_end_nodes_multiple(self):
+        e_orders = Node("e_orders", children="stg_orders")
+        e_orders_legacy = Node("e_orders_legacy", children="stg_orders")
+        stg_orders = Node(
+            "stg_orders",
+            parents=["e_orders", "e_orders_legacy"],
+            children=["fct_orders", "order_conversion_2"],
+        )
+        fct_orders = Node("fct_orders", parents=["stg_orders"], children="order_conversion")
+        order_conversion = Node(
+            "order_conversion", parents=["fct_orders", "stg_orders"]
+        )
+        order_conversion2 = Node(
+            "order_conversion_2", parents=["stg_orders"]
+        )
+        d = DAG()
+        d.add_node(e_orders)
+        d.add_node(e_orders_legacy)
+        d.add_node(stg_orders)
+        d.add_node(fct_orders)
+        d.add_node(order_conversion)
+        d.add_node(order_conversion2)
+
+        expected = set(["order_conversion", "order_conversion_2"])
+        actual = d.get_all_end_nodes()
 
         assert expected == actual
 
