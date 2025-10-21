@@ -141,7 +141,6 @@ class DAG:
         deps = []
         if table_name in self.node_children.keys():
             children = self.node_children[table_name]
-            print("Children:", children)
             if children is not None:
                 for children_name in self.node_children[table_name]:
                     if children_name not in deps:

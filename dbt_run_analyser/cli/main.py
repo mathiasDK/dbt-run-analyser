@@ -42,7 +42,19 @@ def plot_critical_path(manifest_file, log_file, model, title, run_time_starting_
 def get_all_end_nodes(manifest_file):
     """Returning a list of all nodes which have no downstream dependencies."""
     d = DAG(manifest_path=manifest_file)
-    return d.get_all_end_nodes()
+    end_nodes = d.get_all_end_nodes()
+    for node in end_nodes:
+        print(node)
+
+@click.command("get-downstream-dependencies")
+@p.manifest_file
+@click.option(*SINGLE_MODEL_SELECTOR, type=click.STRING, help = "The models from which the critical path must be found.")
+def get_downstream_dependencies(manifest_file, model):
+    """Returning a list of all nodes which have no downstream dependencies."""
+    d = DAG(manifest_path=manifest_file)
+    deps = d.get_downstream_dependencies(table_name=model)
+    for node in deps:
+        print(node)
     
 
 @click.command("help")
@@ -53,6 +65,7 @@ def help_command():
 cli.add_command(plot_run_times)
 cli.add_command(plot_critical_path)
 cli.add_command(get_all_end_nodes)
+cli.add_command(get_downstream_dependencies)
 cli.add_command(help_command)
 
 if __name__ == '__main__':
