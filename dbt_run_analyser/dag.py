@@ -27,6 +27,7 @@ class DAG:
         self.nodes = {}
         self.node_children = {}
         self.node_parents = {}
+        self.resource_types = {}
         self._run_time_lookup = {}
         self.df = pl.DataFrame()
 
@@ -50,6 +51,7 @@ class DAG:
             return None
         self.nodes[node.name] = node
         self.node_parents[node.name] = node.parents
+        self.resource_types("model").append(node.name)
         if node.run_time:
             self._run_time_lookup[node.name] = node.run_time
         if node.parents is not None:
@@ -67,6 +69,7 @@ class DAG:
             nodes (dict): Dictionary of nodes to add.
         """
         self.nodes.update(nodes)
+        self.resource_types.clear()
         for node_name, node in nodes.items():
             if node.run_time:
                 self._run_time_lookup[node.name] = node.run_time
@@ -85,6 +88,7 @@ class DAG:
                         self.node_children[parent] = [node.name]
                     else:
                         self.node_children[parent].append(node.name)
+            self.resource_types("model").append(node_name)
 
     def remove_node(self, node: Node) -> None:
         """
@@ -127,7 +131,7 @@ class DAG:
                     deps.extend(self.get_upstream_dependencies(parent_name, deps=deps))
         return list(set(deps))  # ensures uniqueness
     
-    def get_downstream_dependencies(self, table_name: str, deps: list[str] = None):
+    def get_downstream_dependencies(self, table_name: str, deps: list[str] = None, resource_types: str = None):
         """
         Gets the downstream dependencies of a node.
 
@@ -139,11 +143,16 @@ class DAG:
             list[str]: List of downstream dependencies.
         """
         deps = []
+
+        # When checking dependencies it should only include specific resource types if specified.
+        # The below list contains all resources of the specified type(s).
+        included_resources = set((nodes for type, nodes in resource_types.items() if (type in resource_types or resource_types is None)))
+        
         if table_name in self.node_children.keys():
             children = self.node_children[table_name]
             if children is not None:
                 for children_name in self.node_children[table_name]:
-                    if children_name not in deps:
+                    if children_name not in deps and children_name in included_resources:
                         deps.append(children_name)
                         deps.extend(self.get_downstream_dependencies(children_name, deps=deps))
         return list(set(deps))  # ensures uniqueness
@@ -278,9 +287,10 @@ class DAG:
         Args:
             manifest_path (str): Path to the manifest file.
         """
-        nodes = manifest_parser(manifest_path)
+        nodes, resource_types = manifest_parser(manifest_path)
         for node, parents in nodes.items():
             self.add_node(Node(name=node, parents=parents))
+        self.resource_types = resource_types
 
     def log_to_run_time(self, log_file: str) -> None:
         """

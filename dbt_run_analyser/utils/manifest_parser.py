@@ -16,16 +16,22 @@ def manifest_parser(path_to_manifest) -> dict:
 
     nodes = {}
     name_lookup = {}
+    resource_lookup = {}
 
     for node, vals in d["nodes"].items():
-        if vals["resource_type"] == "model":
-            node_name = vals.get("name")
-            name_lookup[node] = node_name
-            upstream_models = vals.get("depends_on")["nodes"]
-            if upstream_models == []:
-                nodes[node_name] = None
-            else:
-                nodes[node_name] = upstream_models
+        node_name = vals.get("name")
+        name_lookup[node] = node_name
+        upstream_deps = vals.get("depends_on")["nodes"]
+        if upstream_deps == []:
+            nodes[node_name] = None
+        else:
+            nodes[node_name] = upstream_deps
+
+        if vals["resource_type"] in resource_lookup:
+            resource_lookup[vals["resource_type"]].append(node_name)
+        else:
+            resource_lookup[vals["resource_type"]] = [node_name]
+        
 
     for node, parents in nodes.items():
         if parents is not None:
@@ -34,11 +40,10 @@ def manifest_parser(path_to_manifest) -> dict:
                 pretty_names.append(name_lookup.get(parent, parent))
             nodes[node] = pretty_names
 
-    return nodes
+    return nodes, resource_lookup
 
 if __name__ == "__main__":
     import sys
     manifest_file = sys.argv[1]
 
     mp = manifest_parser(manifest_file)
-    print(mp)
