@@ -37,6 +37,13 @@ class DAG:
         if log_file:
             self.log_to_run_time(log_file)
 
+    def __add_resource_type(self, name: str, resource_type:str = "model"):
+        # Adding the node as a resource type. Creating a list if it doesn't already exists.
+        if resource_type not in self.resource_types:
+            self.resource_types[resource_type] = [name]
+        else:
+            self.resource_types[resource_type].append(name)
+
     def add_node(self, node: Node) -> None:
         """
         Adds a node to the DAG.
@@ -51,7 +58,9 @@ class DAG:
             return None
         self.nodes[node.name] = node
         self.node_parents[node.name] = node.parents
-        self.resource_types("model").append(node.name)
+
+        self.__add_resource_type(node.name, resource_type="model")
+
         if node.run_time:
             self._run_time_lookup[node.name] = node.run_time
         if node.parents is not None:
@@ -88,7 +97,7 @@ class DAG:
                         self.node_children[parent] = [node.name]
                     else:
                         self.node_children[parent].append(node.name)
-            self.resource_types("model").append(node_name)
+            self.__add_resource_type(node.name, resource_type="model")
 
     def remove_node(self, node: Node) -> None:
         """
@@ -146,7 +155,11 @@ class DAG:
 
         # When checking dependencies it should only include specific resource types if specified.
         # The below list contains all resources of the specified type(s).
-        included_resources = set((nodes for type, nodes in resource_types.items() if (type in resource_types or resource_types is None)))
+        if resource_types is None:
+            included_resources_lists = self.resource_types.values()
+        else:
+            included_resources_lists = [l for k, l in self.resource_types.items() if k in resource_types]
+        included_resources = set(item for sublist in included_resources_lists for item in sublist)
         
         if table_name in self.node_children.keys():
             children = self.node_children[table_name]

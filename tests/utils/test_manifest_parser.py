@@ -6,7 +6,7 @@ class ManifestParserTest(unittest.TestCase):
     def setUp(self):
         self.PATH_TO_MANIFEST = "test_data/manifest/manifest.json"
 
-    def test_expected_output(self):
+    def test_expected_nodes_output(self):
         expected = {
             "e_order_event_1": None,
             "e_order_event_2": None,
@@ -31,6 +31,23 @@ class ManifestParserTest(unittest.TestCase):
             "order_wide": ["dim_customer", "dim_store", "fct_order"],
         }
 
-        actual = manifest_parser(self.PATH_TO_MANIFEST)
+        actual, _ = manifest_parser(self.PATH_TO_MANIFEST)
 
         self.assertEqual(actual, expected)
+
+    def test_expected_resource_type_output(self):
+        expected = {
+            "model": [
+                "e_order_event_1", "e_order_event_2", "e_order_event_3", "e_order_event_4", "e_order_event_5", 
+                "e_order_event_6", "e_order_event_7", "stg_order_some", "stg_order", 
+                "dim_customer", "dim_store", "fct_order", "order_wide", 
+            ]
+        }
+
+        _, actual = manifest_parser(self.PATH_TO_MANIFEST)
+        
+        for actual_key, actual_vals in actual.items():
+            actual_set = set(actual_vals)
+            expected_set = set(expected[actual_key])
+
+            self.assertEqual(actual_set, expected_set)

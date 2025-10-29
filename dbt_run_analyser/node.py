@@ -12,6 +12,7 @@ class Node:
     def __init__(
         self,
         name: str,
+        resource_type: str = "model",
         run_time: float = 0,
         parents: list[str] = None,
         children: list[str] = None,
@@ -26,6 +27,7 @@ class Node:
             children (list[str], optional): List of child nodes.
         """
         self.name = name
+        self.resource_type = resource_type
         self.run_time = run_time
         self.parents = parents
         self.children = children
