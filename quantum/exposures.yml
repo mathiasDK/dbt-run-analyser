@@ -1,0 +1,13 @@
+version: 2
+exposures:
+  - name: orders
+    type: dashboard
+    description: A BI report for orders.
+
+    depends_on:
+      - ref('dim_customer')
+      - ref('dim_store')
+      - ref('fct_order')
+
+    owner:
+      name: data

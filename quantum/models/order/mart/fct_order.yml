@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: fct_order
+    description: |
+      # Fact Order
+      A combination of all orders.
+      
+    meta:
+      domain: orders
+
+    columns:
+      - name: id
+        description: An unique identifier for the row.
+        data_tests:
+          - not_null

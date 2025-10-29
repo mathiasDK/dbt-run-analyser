@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: e_order_event_1
+    description: |
+      # Order event 1
+      
+    meta:
+      domain: orders
+
+    columns:
+      - name: id
+        description: An unique identifier for the row.
+        data_tests:
+          - not_null
+          - unique
